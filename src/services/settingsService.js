@@ -22,9 +22,21 @@ const DEFAULTS = Object.freeze({
   registration_enabled: true,
   recycle_words: false,
   public_leaderboard: true, // página /ranking acessível sem autenticação
+  brand_name: 'Wordle League', // nome do jogo (cabeçalho, login, títulos, ranking)
+  brand_tagline: 'Desafio diário de palavras', // subtítulo (vazio = não mostrar)
+  brand_footer: 'Uso interno', // texto do rodapé (vazio = não mostrar)
+  brand_logo_round: false, // recortar o logótipo em círculo
 });
 
 const PUBLIC_KEYS = Object.keys(DEFAULTS);
+
+/** Texto simples de personalização: sem caracteres de controlo nem < >. */
+function brandText(x, field, { min, max, label }) {
+  const t = v.string(x, field, { min, max, label });
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f<>]/.test(t)) throw badRequest(`"${label}" contém caracteres inválidos.`);
+  return t;
+}
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -49,6 +61,10 @@ const VALIDATORS = {
   registration_enabled: (x) => v.boolean(x, 'registration_enabled'),
   recycle_words: (x) => v.boolean(x, 'recycle_words'),
   public_leaderboard: (x) => v.boolean(x, 'public_leaderboard'),
+  brand_name: (x) => brandText(x, 'brand_name', { min: 2, max: 40, label: 'Nome do jogo' }),
+  brand_tagline: (x) => brandText(x, 'brand_tagline', { min: 0, max: 60, label: 'Subtítulo' }),
+  brand_footer: (x) => brandText(x, 'brand_footer', { min: 0, max: 120, label: 'Rodapé' }),
+  brand_logo_round: (x) => v.boolean(x, 'brand_logo_round'),
 };
 
 module.exports = function createSettingsService({ db, models }) {

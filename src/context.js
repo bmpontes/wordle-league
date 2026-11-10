@@ -15,6 +15,7 @@ function createContext({ db, config, sessionStore = null }) {
   const wordImport = require('./services/wordImportService')({ ...base, settings });
   const leaderboard = require('./services/leaderboardService')({ ...base, settings, dailyWord });
   const stats = require('./services/statsService')({ ...base, settings, dailyWord, leaderboard });
+  const brand = require('./services/brandService')({ ...base, settings });
   const admin = require('./services/adminService')({ ...base, auth, dailyWord, sessionStore });
 
   // Garante a semente secreta de seleção desde o primeiro arranque.
@@ -23,7 +24,7 @@ function createContext({ db, config, sessionStore = null }) {
   return {
     ...base,
     sessionStore,
-    services: { settings, dailyWord, scoring, game, auth, wordImport, leaderboard, stats, admin },
+    services: { settings, dailyWord, scoring, game, auth, wordImport, leaderboard, stats, admin, brand },
     close() {
       auth.close();
     },

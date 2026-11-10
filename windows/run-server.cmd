@@ -1,5 +1,5 @@
 @echo off
-rem Arranca o servidor da Forense Wordle League (usado pela tarefa agendada do Windows).
+rem Arranca o servidor do Wordle League (usado pela tarefa agendada do Windows).
 rem O registo fica em data\logs\server.log (rodado quando passa de 10 MB, a cada arranque).
 cd /d "%~dp0.."
 

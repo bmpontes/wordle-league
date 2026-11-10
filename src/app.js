@@ -12,6 +12,7 @@ const createApiRouter = require('./routes');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 const SHARED_DIR = path.join(__dirname, 'shared');
+const DEFAULT_LOGO = path.join(PUBLIC_DIR, 'img', 'default-logo.svg');
 
 function createApp(ctx) {
   const { config, models, sessionStore } = ctx;
@@ -57,6 +58,21 @@ function createApp(ctx) {
     });
   }
 
+  // Imagens de personalização (guardadas na BD). Sem logótipo próprio, usa o predefinido.
+  app.get('/brand/:kind(logo|ranking)', (req, res, next) => {
+    try {
+      const img = ctx.services.brand.asset(req.params.kind);
+      if (!img) {
+        if (req.params.kind === 'logo') return res.set('Cache-Control', 'public, max-age=300').sendFile(DEFAULT_LOGO);
+        return res.status(404).end();
+      }
+      res.set({ 'Content-Type': img.mime, 'Cache-Control': 'public, max-age=300', 'Content-Disposition': 'inline' });
+      res.send(img.data);
+    } catch (err) {
+      next(err);
+    }
+  });
+
   // Ficheiros estáticos (sem informação sensível).
   app.use('/shared', express.static(SHARED_DIR, { maxAge: '1h' }));
   app.use(express.static(PUBLIC_DIR, { extensions: ['html'], maxAge: '1h', index: 'index.html' }));
@@ -69,6 +85,7 @@ function createApp(ctx) {
   app.use('/api', rateLimit({ max: 3000, windowMs: 5 * 60 * 1000 }));
   // O carregamento de listas de palavras pode ser maior do que os restantes pedidos.
   app.use('/api/admin/words/preview', express.json({ limit: '6mb' }));
+  app.use('/api/admin/brand', express.json({ limit: '4mb' }));
   app.use('/api', express.json({ limit: '20kb' }));
   app.use(
     '/api',

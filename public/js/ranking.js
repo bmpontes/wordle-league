@@ -53,6 +53,17 @@
     }
   }
 
+  // Lado direito: imagem do ranking (se definida no painel) ou o logótipo.
+  UI.brandReady.then((b) => {
+    const art = document.getElementById('rk-art');
+    if (b && b.rankingUrl) {
+      art.style.backgroundImage = `url("${b.rankingUrl}")`;
+    } else {
+      art.classList.add('logo-mode');
+      art.append(el('img', { src: b ? b.logoUrl : '/brand/logo', alt: '', class: b && b.logoRound ? 'round' : null }));
+    }
+  });
+
   load();
   setInterval(load, REFRESH_MS);
 })();

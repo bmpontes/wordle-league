@@ -215,7 +215,7 @@ test('migrações 002 e 003 preservam os pontos de uma BD criada com a versão 1
   const before = db.prepare('SELECT * FROM point_transactions ORDER BY id').all();
 
   const applied = migrate(db);
-  assert.deepEqual(applied, ['002_first_win_bonus.sql', '003_podium_bonus.sql']);
+  assert.deepEqual(applied, ['002_first_win_bonus.sql', '003_podium_bonus.sql', '004_brand_assets.sql']);
   const after = db.prepare('SELECT * FROM point_transactions ORDER BY id').all();
   for (const row of after) assert.equal(row.win_rank, null);
   assert.deepEqual(after.map(({ win_rank, ...r }) => r), before, 'linhas idênticas');
@@ -255,7 +255,7 @@ test('migração 003 converte bónus de "primeiro a acertar" já atribuídos (ve
     INSERT INTO point_transactions (user_id, season_id, challenge_id, result_id, type, points, reason)
       VALUES (1, 1, 1, 1, 'game_result', 80, 'Vitória'), (1, 1, 1, 1, 'first_win_bonus', 10, 'Bónus: primeiro a acertar');
   `);
-  assert.deepEqual(migrate(db), ['003_podium_bonus.sql']);
+  assert.deepEqual(migrate(db), ['003_podium_bonus.sql', '004_brand_assets.sql']);
   const bonus = db.prepare("SELECT * FROM point_transactions WHERE type = 'first_win_bonus'").get();
   assert.equal(bonus.win_rank, 1);
   assert.equal(bonus.points, 10);

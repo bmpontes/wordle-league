@@ -1,5 +1,5 @@
 ﻿<#
-  Controlo da Forense Wordle League instalada como tarefa do Windows.
+  Controlo do Wordle League instalada como tarefa do Windows.
 
   powershell -ExecutionPolicy Bypass -File .\windows\servico.ps1 -Acao estado
   Ações: iniciar | parar | reiniciar | estado | registo

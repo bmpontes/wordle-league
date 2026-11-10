@@ -123,7 +123,40 @@
     else toast(err.message, 3000);
   }
 
+  /**
+   * Aplica a personalização (nome, subtítulo, rodapé, logótipo) definida no painel.
+   * Elementos marcados com data-brand="name|tagline|footer" e img[data-brand-logo].
+   * O título do separador é "<data-title do body> · <nome>".
+   */
+  async function applyBrand() {
+    let b;
+    try {
+      b = await Api.get('/api/brand');
+    } catch {
+      return null;
+    }
+    const setText = (key, value) => {
+      for (const node of document.querySelectorAll(`[data-brand="${key}"]`)) {
+        node.textContent = value || '';
+        node.classList.toggle('hidden', !value);
+      }
+    };
+    setText('name', b.name);
+    setText('tagline', b.tagline);
+    setText('footer', b.footer);
+    for (const img of document.querySelectorAll('img[data-brand-logo]')) {
+      img.src = b.logoUrl;
+      img.classList.toggle('round', Boolean(b.logoRound));
+    }
+    for (const link of document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]')) link.href = b.logoUrl;
+    const page = document.body.dataset.title;
+    document.title = page ? `${page} · ${b.name}` : b.name;
+    return b;
+  }
+  const brandReady = applyBrand();
+
   window.UI = {
+    brandReady,
     el, clear, toast, showAlert, initPage, handleError,
     formatDay, formatDateTime, formatMonth, STATUS_LABELS,
     applyColorblindPreference, toggleColorblind,

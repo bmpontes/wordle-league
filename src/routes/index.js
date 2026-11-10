@@ -25,6 +25,7 @@ module.exports = function createApiRouter(ctx) {
   const api = express.Router();
 
   api.get('/health', (req, res) => res.json({ status: 'ok' }));
+  api.get('/brand', (req, res) => res.json(ctx.services.brand.publicInfo()));
 
   // Autenticação
   const authLimiter = rateLimit({ max: 30, windowMs: 60 * 1000 });
@@ -70,6 +71,8 @@ module.exports = function createApiRouter(ctx) {
   a.get('/points/adjustments', wrap(admin.adjustments));
   a.post('/points/adjust', wrap(admin.adjustPoints));
   a.get('/audit', wrap(admin.audit));
+  a.post('/brand/:kind', wrap(admin.uploadBrand));
+  a.post('/brand/:kind/remove', wrap(admin.removeBrand));
   api.use('/admin', a);
 
   return api;

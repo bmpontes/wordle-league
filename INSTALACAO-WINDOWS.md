@@ -1,10 +1,12 @@
-# Instalação na máquina da secção (Windows, sem Docker)
+# Instalação em Windows (sem Docker)
 
-Este guia instala a Forense Wordle League num Windows 10/11 ou Windows Server. A aplicação passa a arrancar sozinha com o Windows, reinicia se falhar e faz um backup diário. Demora cerca de 10 minutos.
+Este guia instala a Wordle League num Windows 10/11 ou Windows Server. A aplicação passa a arrancar sozinha com o Windows, reinicia se falhar e faz um backup diário. Demora cerca de 10 minutos.
 
 **Requisitos**
 - Conta com permissões de **administrador** na máquina.
 - **Acesso à Internet** durante a instalação. O Node.js e as dependências são descarregados de `nodejs.org`, `registry.npmjs.org` e `github.com`. Depois de instalada, a aplicação não precisa de Internet.
+
+> **Instalações existentes:** se a aplicação já está instalada noutra pasta (por exemplo `C:\ForenseWordleLeague`), continue a usar essa pasta em todos os comandos. Os nomes internos das tarefas (`ForenseWordleLeague`, `ForenseWordleLeague-Backup`) e da regra de firewall mantêm-se.
 
 ---
 
@@ -19,22 +21,22 @@ Este guia instala a Forense Wordle League num Windows 10/11 ou Windows Server. A
 
 ## 2. Obter a aplicação
 
-Coloque o código numa pasta fixa, por exemplo `C:\ForenseWordleLeague`. Há duas formas:
+Coloque o código numa pasta fixa, por exemplo `C:\WordleLeague`. Há duas formas:
 
 - **Com git:**
   ```powershell
-  git clone https://github.com/bmpontes/FOR_Wordle_League.git C:\ForenseWordleLeague
+  git clone https://github.com/bmpontes/FOR_Wordle_League.git C:\WordleLeague
   ```
-- **Sem git:** no GitHub, use **Code → Download ZIP** (ou o ZIP da versão fornecido pela secção) e extraia o conteúdo para `C:\ForenseWordleLeague`.
+- **Sem git:** no GitHub, use **Code → Download ZIP** (ou o ZIP da versão fornecido pela secção) e extraia o conteúdo para `C:\WordleLeague`.
 
-Não use o Ambiente de Trabalho nem a pasta Transferências. A aplicação corre com a conta de sistema, e a base de dados fica em `C:\ForenseWordleLeague\data`.
+Não use o Ambiente de Trabalho nem a pasta Transferências. A aplicação corre com a conta de sistema, e a base de dados fica em `C:\WordleLeague\data`.
 
 ## 3. Executar o instalador
 
 Abra o **PowerShell como Administrador** (botão direito → *Executar como administrador*) e execute:
 
 ```powershell
-cd C:\ForenseWordleLeague
+cd C:\WordleLeague
 powershell -ExecutionPolicy Bypass -File .\windows\instalar.ps1
 ```
 
@@ -59,13 +61,14 @@ O instalador:
    As listas reais **não estão no GitHub**, para não revelar as respostas. Copie-as para a pasta `listas\` da máquina, ou importe-as de onde as tiver. Os formatos estão em `examples\`.
 3. Em **Admin → Estado**, confirme que não há avisos.
 4. Crie as contas da equipa em **Admin → Utilizadores**. Em alternativa, deixe o registo aberto e cada pessoa cria a sua conta; depois pode desativar o registo em **Parâmetros**.
-5. Abra a classificação para o ecrã da secção em `http://<nome-da-máquina>:3000/ranking`.
+5. Em **Admin → Personalização**, defina o nome do jogo, o subtítulo, o rodapé, o logótipo e, se quiser, a imagem da página `/ranking`.
+6. Abra a classificação para o ecrã da equipa em `http://<nome-da-máquina>:3000/ranking`.
 
 ---
 
 ## Operação diária
 
-Execute estes comandos no PowerShell, dentro de `C:\ForenseWordleLeague`. Os comandos que alteram o estado exigem PowerShell como Administrador.
+Execute estes comandos no PowerShell, dentro de `C:\WordleLeague`. Os comandos que alteram o estado exigem PowerShell como Administrador.
 
 | Ação | Comando |
 |---|---|
@@ -102,7 +105,7 @@ node scripts\restore.js data\backups\wordle-AAAAMMDD-HHMMSS.sqlite --yes
 |---|---|
 | `node` não é reconhecido | Feche e reabra o PowerShell depois de instalar o Node.js. |
 | `npm ci` falha | Acesso à Internet ou proxy. Se houver proxy, configure-o com `npm config set proxy http://proxy:porta` e `npm config set https-proxy http://proxy:porta`. |
-| Funciona na própria máquina mas não noutros PCs | Firewall: a regra só cobre redes de **Domínio** e **Privadas**. Se a rede estiver classificada como *Pública*, altere a classificação ou a regra *Forense Wordle League*. |
+| Funciona na própria máquina mas não noutros PCs | Firewall: a regra só cobre redes de **Domínio** e **Privadas**. Se a rede estiver classificada como *Pública*, altere a classificação ou a regra *Wordle League*. |
 | A página não abre | Veja `servico.ps1 -Acao estado` e `-Acao registo` (o ficheiro de registo é `data\logs\server.log`). |
 | A porta 3000 já está ocupada | Edite `PORT=` no `.env`, volte a correr `instalar.ps1 -Porta <nova>` e reinicie. |
 | Esqueceu-se da password de administrador | Crie outro administrador com `npm run create-admin` e redefina a password no painel. |

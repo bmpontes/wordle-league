@@ -31,7 +31,7 @@ async function start(env = process.env) {
 
   const app = createApp(ctx);
   const server = app.listen(config.port, config.host, () => {
-    console.log(`Forense Wordle League disponível em http://${config.host}:${config.port} (fuso: ${config.timezone})`);
+    console.log(`Wordle League disponível em http://${config.host}:${config.port} (fuso: ${config.timezone})`);
   });
 
   const shutdown = (signal) => {

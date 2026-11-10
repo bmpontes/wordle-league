@@ -1,8 +1,8 @@
 {
-  "name": "forense-wordle-league",
-  "version": "1.4.0",
+  "name": "wordle-league",
+  "version": "1.5.0",
   "private": true,
-  "description": "Forense Wordle League — jogo de palavras diário interno (COCIBER, Secção de Investigação Digital)",
+  "description": "Wordle League — jogo de palavras diário para equipas, com pontuação, classificações e painel de administração (nome e logótipo personalizáveis)",
   "repository": {
     "type": "git",
     "url": "https://github.com/bmpontes/FOR_Wordle_League.git"

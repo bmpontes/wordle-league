@@ -337,6 +337,82 @@
     }
   });
 
+  // ---------- Personalização ----------
+  const BRAND_TEXT = ['brand_name', 'brand_tagline', 'brand_footer'];
+
+  function showBrandImages(b) {
+    const logo = document.getElementById('brand-logo-preview');
+    logo.src = b.logoUrl;
+    logo.classList.toggle('round', Boolean(b.logoRound));
+    const rk = document.getElementById('brand-ranking-preview');
+    rk.classList.toggle('hidden', !b.rankingUrl);
+    document.getElementById('brand-ranking-none').classList.toggle('hidden', Boolean(b.rankingUrl));
+    if (b.rankingUrl) rk.src = b.rankingUrl;
+    // Atualiza também o cabeçalho desta página.
+    for (const img of document.querySelectorAll('img[data-brand-logo]')) {
+      img.src = b.logoUrl;
+      img.classList.toggle('round', Boolean(b.logoRound));
+    }
+    for (const n of document.querySelectorAll('[data-brand="name"]')) n.textContent = b.name;
+    for (const n of document.querySelectorAll('[data-brand="tagline"]')) { n.textContent = b.tagline; n.classList.toggle('hidden', !b.tagline); }
+    for (const n of document.querySelectorAll('[data-brand="footer"]')) { n.textContent = b.footer; n.classList.toggle('hidden', !b.footer); }
+  }
+
+  loaders.brand = async () => {
+    const [{ settings }, brand] = await Promise.all([Api.get('/api/admin/settings'), Api.get('/api/brand')]);
+    for (const k of BRAND_TEXT) document.getElementById(`b-${k}`).value = settings[k];
+    document.getElementById('b-brand_logo_round').checked = settings.brand_logo_round;
+    showBrandImages(brand);
+  };
+
+  document.getElementById('form-brand').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alertEl = document.getElementById('brand-text-alert');
+    const body = {};
+    for (const k of BRAND_TEXT) body[k] = document.getElementById(`b-${k}`).value.trim();
+    body.brand_logo_round = document.getElementById('b-brand_logo_round').checked;
+    try {
+      await Api.put('/api/admin/settings', body);
+      showBrandImages(await Api.get('/api/brand'));
+      showAlert(alertEl, 'ok', 'Personalização guardada.');
+    } catch (err) {
+      UI.handleError(err, alertEl);
+    }
+  });
+
+  const readAsDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(new Error('Não foi possível ler o ficheiro.'));
+      r.readAsDataURL(file);
+    });
+
+  for (const kind of ['logo', 'ranking']) {
+    const alertEl = document.getElementById(`brand-${kind}-alert`);
+    document.getElementById(`brand-${kind}-upload`).addEventListener('click', async () => {
+      const file = document.getElementById(`brand-${kind}-file`).files[0];
+      if (!file) return showAlert(alertEl, 'error', 'Escolha uma imagem PNG, JPEG ou WEBP.');
+      if (file.size > 2 * 1024 * 1024) return showAlert(alertEl, 'error', 'Imagem demasiado grande (máximo 2 MB).');
+      try {
+        const b = await Api.post(`/api/admin/brand/${kind}`, { filename: file.name, data: await readAsDataUrl(file) });
+        showBrandImages(b);
+        showAlert(alertEl, 'ok', 'Imagem atualizada.');
+      } catch (err) {
+        UI.handleError(err, alertEl);
+      }
+    });
+    document.getElementById(`brand-${kind}-remove`).addEventListener('click', async () => {
+      if (!confirm(kind === 'logo' ? 'Repor o logótipo predefinido?' : 'Remover a imagem do ranking?')) return;
+      try {
+        showBrandImages(await Api.post(`/api/admin/brand/${kind}/remove`));
+        showAlert(alertEl, 'ok', 'Feito.');
+      } catch (err) {
+        UI.handleError(err, alertEl);
+      }
+    });
+  }
+
   // ---------- Auditoria ----------
   loaders.audit = async () => {
     const { entries } = await Api.get('/api/admin/audit');

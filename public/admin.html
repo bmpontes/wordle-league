@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Administração · Forense Wordle League</title>
-  <link rel="icon" href="/img/favicon-32.png" type="image/png" sizes="32x32">
-  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <title>Administração · Wordle League</title>
+  <link rel="icon" href="/brand/logo">
+  <link rel="apple-touch-icon" href="/brand/logo">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
+<body data-title="Administração">
   <header class="topbar">
     <a class="brand" href="/">
-      <img src="/img/emblem-96.webp" alt="" width="42" height="42">
-      <span class="brand-text"><span class="brand-title">FORENSE WORDLE LEAGUE</span><span class="brand-sub">COCIBER</span></span>
+      <img src="/brand/logo" alt="" width="42" height="42" data-brand-logo>
+      <span class="brand-text"><span class="brand-title" data-brand="name">Wordle League</span><span class="brand-sub" data-brand="tagline"></span></span>
     </a>
     <nav class="nav" aria-label="Navegação principal">
       <a href="/" data-player>Jogar</a>
@@ -32,6 +32,7 @@
       <button type="button" class="tab" role="tab" data-section="settings" aria-selected="false">Parâmetros</button>
       <button type="button" class="tab" role="tab" data-section="stats" aria-selected="false">Estatísticas</button>
       <button type="button" class="tab" role="tab" data-section="points" aria-selected="false">Ajustes de pontos</button>
+      <button type="button" class="tab" role="tab" data-section="brand" aria-selected="false">Personalização</button>
       <button type="button" class="tab" role="tab" data-section="audit" aria-selected="false">Auditoria</button>
     </div>
     <div id="admin-alert"></div>
@@ -161,6 +162,45 @@
       </div>
     </section>
 
+    <!-- Personalização -->
+    <section id="section-brand" data-panel class="hidden">
+      <div class="card">
+        <h2>Nome e textos</h2>
+        <p class="muted">Aparecem em todas as páginas: cabeçalho, login, títulos do separador, rodapé e página /ranking.</p>
+        <form id="form-brand" novalidate>
+          <div class="row">
+            <div class="field"><label for="b-brand_name">Nome do jogo</label><input type="text" id="b-brand_name" maxlength="40"></div>
+            <div class="field"><label for="b-brand_tagline">Subtítulo (opcional)</label><input type="text" id="b-brand_tagline" maxlength="60"></div>
+          </div>
+          <div class="field"><label for="b-brand_footer">Rodapé (opcional)</label><input type="text" id="b-brand_footer" maxlength="120"></div>
+          <div class="field"><label class="check"><input type="checkbox" id="b-brand_logo_round"> Mostrar o logótipo recortado em círculo</label></div>
+          <div id="brand-text-alert"></div>
+          <button class="btn primary" type="submit">Guardar</button>
+        </form>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h2>Logótipo</h2>
+          <p class="muted">PNG, JPEG ou WEBP, de preferência quadrado, até 2 MB. Usado no cabeçalho, no login, no ícone do separador e no /ranking.</p>
+          <img class="brand-preview" id="brand-logo-preview" src="/brand/logo" alt="Logótipo atual">
+          <div class="field"><input type="file" id="brand-logo-file" accept="image/png,image/jpeg,image/webp"></div>
+          <button type="button" class="btn" id="brand-logo-upload">Carregar logótipo</button>
+          <button type="button" class="btn danger" id="brand-logo-remove">Repor o predefinido</button>
+          <div id="brand-logo-alert"></div>
+        </div>
+        <div class="card">
+          <h2>Imagem do /ranking (opcional)</h2>
+          <p class="muted">Imagem grande do lado direito da página /ranking (por exemplo, um cartaz da equipa, ao alto). Sem imagem, é usado o logótipo com um fundo neutro.</p>
+          <img class="brand-preview wide hidden" id="brand-ranking-preview" alt="Imagem atual do ranking">
+          <p class="muted" id="brand-ranking-none">A usar o logótipo.</p>
+          <div class="field"><input type="file" id="brand-ranking-file" accept="image/png,image/jpeg,image/webp"></div>
+          <button type="button" class="btn" id="brand-ranking-upload">Carregar imagem</button>
+          <button type="button" class="btn danger" id="brand-ranking-remove">Remover (usar o logótipo)</button>
+          <div id="brand-ranking-alert"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- Auditoria -->
     <section id="section-audit" data-panel class="hidden">
       <div class="card">
@@ -174,7 +214,7 @@
       </div>
     </section>
   </main>
-  <footer>Uso interno · Secção de Investigação Digital · COCIBER</footer>
+  <footer data-brand="footer">Uso interno</footer>
   <script src="/js/api.js"></script>
   <script src="/js/common.js"></script>
   <script src="/js/admin.js"></script>

@@ -49,6 +49,12 @@ Quando a especificação não definia um ponto, foi escolhida a solução mais s
 - **Épocas mensais:** os registos em `seasons` são criados quando são necessários. Os pontos de um jogo pertencem à época da **data do desafio**, não à hora em que foram registados.
 - **Desempate na diária:** primeiro os pontos, depois a vitória, depois menos tentativas e por fim quem terminou primeiro. Nas classificações mensal e de sempre: pontos, vitórias, taxa de sucesso e nome.
 
+### Personalização
+- **Textos nos parâmetros, imagens na base de dados.** O nome, o subtítulo, o rodapé e o "logótipo redondo" são parâmetros normais (auditados). O logótipo e a imagem do `/ranking` ficam na tabela `brand_assets` (migração 004), por isso entram nos backups e não dependem de ficheiros soltos.
+- **As páginas são estáticas e genéricas.** O `common.js` pede `GET /api/brand` (público, só textos e endereços) e preenche os elementos `data-brand`. As imagens são servidas em `/brand/logo` e `/brand/ranking` com um parâmetro de versão para limpar a cache.
+- **Uploads seguros:** só PNG, JPEG ou WEBP, com o tipo verificado pelos primeiros bytes e no máximo 2 MB. **Não se aceitam SVG**, que podem conter scripts. Sem logótipo próprio, é servido `public/img/default-logo.svg`.
+- **Os identificadores internos mantêm-se** (tarefa do Windows `ForenseWordleLeague`, regra de firewall, volume Docker `forense-wordle-league_wordle-data`, cookie `fwl.sid`). Nenhum utilizador os vê, e mudá-los partiria instalações existentes ou, no Docker, desligaria os dados.
+
 ### Contas
 - **O registo está aberto por omissão** (pedido na especificação) e o administrador pode desativá-lo.
 - **Não há eliminação de utilizadores**, só bloqueio. Assim preserva-se a integridade dos resultados e da auditoria.

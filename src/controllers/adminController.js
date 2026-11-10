@@ -47,5 +47,8 @@ module.exports = ({ services }) => {
     },
 
     audit: (req, res) => res.json({ entries: admin.audit() }),
+
+    uploadBrand: (req, res) => res.json(services.brand.upload(req.params.kind, req.body || {}, actor(req))),
+    removeBrand: (req, res) => res.json(services.brand.remove(req.params.kind, actor(req))),
   };
 };

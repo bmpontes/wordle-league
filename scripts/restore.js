@@ -26,7 +26,7 @@ function main() {
     const result = check.pragma('integrity_check', { simple: true });
     if (result !== 'ok') throw new Error(`O backup não passou a verificação de integridade: ${result}`);
     const hasSchema = check.prepare("SELECT COUNT(*) FROM sqlite_master WHERE name = 'schema_migrations'").pluck().get();
-    if (!hasSchema) throw new Error('O ficheiro não parece ser uma base de dados da Forense Wordle League.');
+    if (!hasSchema) throw new Error('O ficheiro não parece ser uma base de dados do Wordle League.');
   } finally {
     check.close();
   }

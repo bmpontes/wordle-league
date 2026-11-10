@@ -1,6 +1,6 @@
 ﻿#Requires -RunAsAdministrator
 <#
-  Instala a Forense Wordle League numa máquina Windows (sem Docker).
+  Instala o Wordle League numa máquina Windows (sem Docker).
 
   Uso (PowerShell como Administrador, dentro da pasta da aplicação):
     powershell -ExecutionPolicy Bypass -File .\windows\instalar.ps1
@@ -31,7 +31,7 @@ function Aviso([string]$Texto) { Write-Host "    $Texto" -ForegroundColor Yellow
 
 if ($App -like "$env:USERPROFILE*") {
   Aviso "A aplicação está dentro da pasta do utilizador ($App)."
-  Aviso 'Recomenda-se uma pasta fixa, por exemplo C:\ForenseWordleLeague.'
+  Aviso 'Recomenda-se uma pasta fixa, por exemplo C:\WordleLeague.'
 }
 
 # 1. Node.js -------------------------------------------------------------------
@@ -88,7 +88,7 @@ if ($resp -match '^[sS]') {
 
 # 5. Firewall -------------------------------------------------------------------
 Passo "A abrir a porta $Porta na firewall"
-$regra = 'Forense Wordle League'
+$regra = 'Forense Wordle League'   # nome interno mantido por compatibilidade com instalações existentes
 Get-NetFirewallRule -DisplayName $regra -ErrorAction SilentlyContinue | Remove-NetFirewallRule
 New-NetFirewallRule -DisplayName $regra -Direction Inbound -Protocol TCP -LocalPort $Porta -Action Allow -Profile Domain, Private | Out-Null
 Ok "Regra '$regra' criada (perfis Domínio e Privado)."
@@ -101,7 +101,7 @@ $conta = New-ScheduledTaskPrincipal -UserId 'SYSTEM' -LogonType ServiceAccount -
 $opcoes = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable `
   -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew
 Register-ScheduledTask -TaskName $NomeTarefa -Action $acao -Trigger $gatilho -Principal $conta -Settings $opcoes `
-  -Description 'Forense Wordle League (servidor Node.js)' -Force | Out-Null
+  -Description 'Wordle League (servidor Node.js)' -Force | Out-Null
 Ok 'Arranca automaticamente com o Windows e reinicia em caso de falha.'
 
 # 7. Backup diário ----------------------------------------------------------------
@@ -111,7 +111,7 @@ $acaoBk = New-ScheduledTaskAction -Execute 'powershell.exe' `
 $gatilhoBk = New-ScheduledTaskTrigger -Daily -At 3am
 $opcoesBk = New-ScheduledTaskSettingsSet -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
 Register-ScheduledTask -TaskName "$NomeTarefa-Backup" -Action $acaoBk -Trigger $gatilhoBk -Principal $conta -Settings $opcoesBk `
-  -Description 'Backup diário da base de dados da Forense Wordle League' -Force | Out-Null
+  -Description 'Backup diário da base de dados do Wordle League' -Force | Out-Null
 Ok 'Backups em data\backups (mantidos 30 dias).'
 
 # 8. Arranque ---------------------------------------------------------------------

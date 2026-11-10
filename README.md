@@ -1,6 +1,6 @@
-# Forense Wordle League
+# Wordle League
 
-Jogo de palavras diário, inspirado no Wordle, para a **Secção de Investigação Digital (COCIBER)**. Tem pontuação, streaks, bónus, classificações diária, mensal e de sempre, e um painel de administração.
+Jogo de palavras diário, inspirado no Wordle, para equipas e organizações. **O nome, o subtítulo, o rodapé e o logótipo são personalizáveis no painel**, sem mexer em código. Tem pontuação, streaks, bónus, classificações diária, mensal e de sempre, e um painel de administração.
 
 - **Uma palavra por dia, igual para todos.** Muda à meia-noite de Portugal (`Europe/Lisbon`) e só se pode jogar no período definido (por omissão, das 09:30 às 00:00).
 - **Avaliação feita só no servidor.** A palavra secreta nunca chega ao browser antes de o jogador terminar.
@@ -20,6 +20,7 @@ Jogo de palavras diário, inspirado no Wordle, para a **Secção de Investigaç�
   - [Desenvolvimento local](#desenvolvimento-local)
 - [Primeiro administrador](#primeiro-administrador)
 - [Listas de palavras](#listas-de-palavras)
+- [Personalização](#personalização)
 - [Configuração](#configuração)
 - [Regras e pontuação](#regras-e-pontuação)
 - [Operação: backups, restauro e atualizações](#operação-backups-restauro-e-atualizações)
@@ -39,12 +40,13 @@ Jogo de palavras diário, inspirado no Wordle, para a **Secção de Investigaç�
 | `/leaderboard` **Classificação** | jogadores e admin | Classificação diária (por data), mensal (com histórico de meses) e desde sempre. |
 | `/profile` **Perfil** | jogadores e admin | Jogos, vitórias, % de vitórias, distribuição por tentativas, streak atual e melhor, melhor posição mensal, histórico e origem de cada ponto. Permite também alterar a password. |
 | `/regras` **Regras** | todos com sessão | Regras do jogo geradas a partir dos parâmetros atuais: se o admin os mudar, o texto muda sozinho. |
-| `/admin` **Admin** | administradores | Estado, palavras (importar/exportar), utilizadores (criar, bloquear, renomear, redefinir password), parâmetros, estatísticas, ajustes de pontos e auditoria. |
+| `/admin` **Admin** | administradores | Estado, palavras (importar/exportar), utilizadores (criar, bloquear, renomear, redefinir password), parâmetros, personalização, estatísticas, ajustes de pontos e auditoria. |
 | `/ranking` **Ranking público** | qualquer pessoa (desativável) | Classificação **do mês em curso**, pensada para ficar aberta num ecrã da secção. Atualiza-se a cada minuto. |
 | `/login` | — | Entrar e criar conta (o registo pode ser desligado). |
 
 Outros pormenores:
-- Interface em português de Portugal, com tema escuro e o emblema COCIBER, adaptada a desktop, tablet e telemóvel.
+- Interface em português de Portugal, com tema escuro, adaptada a desktop, tablet e telemóvel.
+- Nome, subtítulo, rodapé, logótipo e imagem do `/ranking` configuráveis em **Admin → Personalização** (ver [Personalização](#personalização)).
 - Modo para daltonismo (botão ◐ no menu).
 - Os administradores não têm o separador "Jogar" e entram diretamente no painel.
 
@@ -54,7 +56,7 @@ Requisito comum: **Node.js 22.9 ou superior** (recomendado: 24 LTS), ou Docker.
 
 ### Windows (produção)
 
-É a forma usada na máquina da secção. A aplicação corre como **tarefa do Windows**: arranca com o sistema, reinicia se falhar e faz um **backup diário**. O guia completo, com resolução de problemas, está em **[INSTALACAO-WINDOWS.md](INSTALACAO-WINDOWS.md)**.
+É a forma recomendada para uma máquina Windows. A aplicação corre como **tarefa do Windows**: arranca com o sistema, reinicia se falhar e faz um **backup diário**. O guia completo, com resolução de problemas, está em **[INSTALACAO-WINDOWS.md](INSTALACAO-WINDOWS.md)**.
 
 Resumo, num PowerShell **como Administrador**:
 
@@ -62,11 +64,11 @@ Resumo, num PowerShell **como Administrador**:
 # 1. Instalar o Node.js 24 LTS (https://nodejs.org) e abrir uma NOVA janela do PowerShell
 
 # 2. Obter o código para uma pasta fixa
-git clone https://github.com/bmpontes/FOR_Wordle_League.git C:\ForenseWordleLeague
-#    (sem git: descarregar o ZIP do GitHub em "Code → Download ZIP" e extrair para C:\ForenseWordleLeague)
+git clone https://github.com/bmpontes/FOR_Wordle_League.git C:\WordleLeague
+#    (sem git: descarregar o ZIP do GitHub em "Code → Download ZIP" e extrair para C:\WordleLeague)
 
 # 3. Instalar (dependências, .env, administrador, firewall, tarefas de arranque e backup)
-cd C:\ForenseWordleLeague
+cd C:\WordleLeague
 powershell -ExecutionPolicy Bypass -File .\windows\instalar.ps1
 ```
 
@@ -162,6 +164,20 @@ Veja os exemplos em [examples/](examples/).
 
 Use estas fontes **só** como palavras aceites, nunca como secretas: têm muitas palavras obscuras.
 
+## Personalização
+
+Tudo se configura em **Admin → Personalização** e aplica-se a todas as páginas (cabeçalho, login, títulos do separador, ícone do browser, rodapé e `/ranking`):
+
+| Opção | Omissão | Notas |
+|---|---|---|
+| Nome do jogo | `Wordle League` | 2 a 40 caracteres. |
+| Subtítulo | `Desafio diário de palavras` | Opcional (vazio = não aparece). |
+| Rodapé | `Uso interno` | Opcional. |
+| Logótipo | "W" neutro | PNG, JPEG ou WEBP, de preferência quadrado, até 2 MB. Opção para o recortar em círculo. |
+| Imagem do `/ranking` | — | Opcional: imagem grande (ao alto) do lado direito do ranking público. Sem ela, é usado o logótipo com brilho sobre um fundo neutro. |
+
+As imagens são guardadas **na base de dados** (tabela `brand_assets`), por isso entram nos backups automáticos e sobrevivem a atualizações. Por segurança, o tipo é verificado pelo conteúdo do ficheiro e **não são aceites SVG** (podem conter scripts).
+
 ## Configuração
 
 ### Variáveis de ambiente (`.env`)
@@ -253,7 +269,7 @@ O restauro verifica a integridade do backup e guarda a BD atual em `wordle.sqlit
 
 ```powershell
 # Windows (PowerShell como Administrador)
-cd C:\ForenseWordleLeague
+cd C:\WordleLeague
 git pull                       # ou copie os ficheiros novos por cima, SEM apagar data\ nem .env
 powershell -ExecutionPolicy Bypass -File .\windows\atualizar.ps1
 ```
@@ -283,12 +299,12 @@ npm ci
 npm test
 ```
 
-São 64 testes automatizados (`node:test` + `supertest`) com bases de dados temporárias. Cobrem:
+São 69 testes automatizados (`node:test` + `supertest`) com bases de dados temporárias. Cobrem:
 - jogo: avaliação de letras, letras repetidas, acentos, palavras inválidas, limite de tentativas, vitória e derrota;
 - pontuação: pontos, streaks, bónus de pódio e prevenção de pontos duplicados;
 - desafio diário: palavra consistente, mudança à meia-noite de Lisboa (incluindo mudanças de hora), período de jogo e importação de listas;
 - segurança: isolamento entre utilizadores, CSRF, limitação de logins, bloqueio de contas e proteção da palavra secreta;
-- dados: ranking público, regras, persistência após reinício e **migrações sobre bases de dados com dados** de versões anteriores.
+- dados: personalização (incluindo a recusa de imagens disfarçadas), ranking público, regras, persistência após reinício e **migrações sobre bases de dados com dados** de versões anteriores.
 
 ## Arquitetura
 
@@ -306,7 +322,7 @@ src/
   middleware/          autenticação, CSRF, rate limit, erros
   shared/normalize.js  normalização de palavras (a mesma no servidor e no browser)
   utils/               datas/fuso, relógio (injetável nos testes), validação, erros
-public/                páginas HTML, CSS, JS e imagens (sem dependências externas)
+public/                páginas HTML, CSS, JS e logótipo predefinido (sem dependências externas)
 scripts/               create-admin, migrate, backup, restore
 windows/               instalação e operação no Windows (PowerShell)
 test/                  testes automatizados
@@ -316,9 +332,9 @@ docs/DECISOES.md       decisões técnicas e limitações
 Dockerfile, docker-compose.yml, nginx/   implementação alternativa com Docker
 ```
 
-**Base de dados:** SQLite em modo WAL. As tabelas principais são `users`, `daily_challenges`, `guesses`, `daily_results`, `word_bank`, `accepted_words`, `seasons`, `point_transactions` (livro de pontos), `settings`, `audit_log`, `word_imports` e `sessions`.
+**Base de dados:** SQLite em modo WAL. As tabelas principais são `users`, `daily_challenges`, `guesses`, `daily_results`, `word_bank`, `accepted_words`, `seasons`, `point_transactions` (livro de pontos), `settings`, `brand_assets` (imagens de personalização), `audit_log`, `word_imports` e `sessions`.
 
-**Alterar o esquema:** crie um ficheiro novo, por exemplo `004_descricao.sql`. Nunca edite uma migração já aplicada.
+**Alterar o esquema:** crie um ficheiro novo, por exemplo `005_descricao.sql`. Nunca edite uma migração já aplicada.
 
 ## API
 
@@ -327,12 +343,13 @@ Todos os pedidos que alteram dados exigem o cabeçalho `X-CSRF-Token`, devolvido
 | Rota | Acesso | Descrição |
 |---|---|---|
 | `GET /api/health` | público | Estado do serviço. |
+| `GET /api/brand` · `GET /brand/logo` · `GET /brand/ranking` | público | Personalização (nome, textos e imagens). |
 | `GET /api/public/leaderboard` | público (desativável) | Classificação do mês em curso (`/ranking`). |
 | `GET /api/auth/session` · `POST /api/auth/login` · `register` · `logout` · `password` | — | Autenticação. |
 | `GET /api/game/today` · `POST /api/game/guess` | sessão | Estado do jogo, período de jogo e tentativa. |
 | `GET /api/leaderboard/daily?date=` · `monthly?season=AAAA-MM` · `alltime` · `seasons` | sessão | Classificações. |
 | `GET /api/profile/me` · `GET /api/rules` | sessão | Perfil e regras atuais. |
-| `/api/admin/…` (`status`, `stats`, `users`, `settings`, `words`, `points`, `audit`) | administrador | Painel de administração. |
+| `/api/admin/…` (`status`, `stats`, `users`, `settings`, `words`, `points`, `brand`, `audit`) | administrador | Painel de administração. |
 
 ## Decisões técnicas e limitações
 
@@ -340,4 +357,4 @@ Ver **[docs/DECISOES.md](docs/DECISOES.md)**: estratégia de seleção da palavr
 
 ## Licença
 
-Projeto de uso interno da Secção de Investigação Digital (COCIBER). Ainda não foi definida nenhuma licença de distribuição.
+Projeto criado para uso interno de uma equipa. Ainda não foi definida nenhuma licença de distribuição.
