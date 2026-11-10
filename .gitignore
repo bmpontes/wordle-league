@@ -1,0 +1,24 @@
+node_modules/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite.pre-restore-*
+backups/
+.env
+.env.*
+!.env.example
+nginx/certs/*
+!nginx/certs/.gitkeep
+npm-debug.log*
+.DS_Store
+Thumbs.db
+coverage/
+windows/node-path.txt
+
+# Listas de palavras reais: NUNCA publicar (a lista secreta revela as respostas).
+listas/*
+!listas/LEIA-ME.md
+
+# Originais de imagem (pesados; o cartaz tem nomes da equipa). A app usa public/img.
+branding/

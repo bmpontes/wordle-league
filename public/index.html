@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forense Wordle League</title>
+  <link rel="icon" href="/img/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/img/emblem-96.webp" alt="" width="42" height="42">
+      <span class="brand-text"><span class="brand-title">FORENSE WORDLE LEAGUE</span><span class="brand-sub">COCIBER</span></span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="/" data-player>Jogar</a>
+      <a href="/leaderboard">Classificação</a>
+      <a href="/profile">Perfil</a>
+      <a href="/regras">Regras</a>
+      <a href="/admin" data-admin>Admin</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="game" aria-labelledby="game-title">
+      <h1 id="game-title" class="sr-only">Desafio diário</h1>
+      <div class="game-head">
+        <div class="challenge-tag">Desafio de <strong id="challenge-date">—</strong></div>
+        <div class="countdown"><span id="countdown-label">Próximo desafio em</span> <strong id="countdown">--:--:--</strong></div>
+      </div>
+      <div id="game-alert"></div>
+      <div id="board" class="board" role="grid" aria-label="Grelha de tentativas"></div>
+      <p id="sr-status" class="sr-only" aria-live="polite"></p>
+      <div id="result" class="card result-panel hidden" aria-live="polite"></div>
+      <div id="keyboard" class="keyboard" aria-label="Teclado virtual"></div>
+      <p class="muted mono" id="attempts-info"></p>
+    </section>
+  </main>
+
+  <footer>Uso interno · Secção de Investigação Digital · COCIBER</footer>
+
+  <script src="/shared/normalize.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/game.js"></script>
+</body>
+</html>

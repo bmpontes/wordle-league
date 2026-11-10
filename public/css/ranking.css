@@ -1,0 +1,110 @@
+/* Classificação pública do mês — leaderboard à esquerda, arte do cartaz da secção (emblema) à direita. */
+.rk-page {
+  --gold: #f2b233;
+  --gold-2: #ffd27a;
+  --ink: #e9eef6;
+  --rk-font: "Bahnschrift", "DIN Alternate", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse 45% 55% at 10% 20%, rgba(30, 90, 170, 0.22), transparent 70%),
+    linear-gradient(180deg, #02060d 0%, #061021 55%, #02050b 100%);
+  color: var(--ink);
+  font-family: var(--rk-font);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ---------- Arte (emblema do cartaz) ---------- */
+.rk-art {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 52vw;
+  z-index: 0;
+  background: url("/img/ranking-emblem-art.webp") center / cover no-repeat;
+  /* Funde a arte com o fundo escuro do lado da leaderboard. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 22%);
+}
+
+/* ---------- Leaderboard ---------- */
+.rk-layout {
+  position: relative;
+  z-index: 1;
+  max-width: none;
+  margin: 0;
+  min-height: 100vh;
+  padding: clamp(24px, 5vw, 72px);
+  display: flex;
+  align-items: center;
+}
+.rk-board {
+  width: min(44vw, 760px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 2.6vh, 30px);
+}
+
+.rk-head { display: flex; flex-direction: column; gap: 8px; }
+.rk-kicker {
+  margin: 0; color: var(--gold); text-transform: uppercase; font-weight: 600;
+  letter-spacing: 0.32em; font-size: clamp(0.8rem, 1.1vw, 1rem);
+}
+.rk-title {
+  margin: 0; font-weight: 800; text-transform: uppercase; letter-spacing: 0.03em; line-height: 1.15;
+  font-size: clamp(1.6rem, 2.9vw, 2.8rem); padding-top: 0.08em;
+  background: linear-gradient(180deg, #ffffff 0%, #e2e6ec 45%, #aeb6c2 60%, #f3f5f8 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.7));
+}
+.rk-rule {
+  display: block; height: 2px; width: 100%;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-2) 55%, rgba(242, 178, 51, 0) 100%);
+  box-shadow: 0 0 10px rgba(242, 178, 51, 0.45);
+}
+.rk-meta { margin: 0; color: #b8c3d4; text-transform: uppercase; letter-spacing: 0.14em; font-size: clamp(0.8rem, 1vw, 0.95rem); }
+
+.rk-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: clamp(8px, 1.4vh, 14px); }
+.rk-row {
+  display: grid;
+  grid-template-columns: 2.4em 1ch minmax(0, 1fr) 1ch auto;
+  align-items: center; column-gap: 0.9em;
+  font-size: clamp(1.05rem, 1.75vw, 1.65rem);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.rk-rank { color: var(--gold); font-weight: 700; }
+.rk-bar { color: rgba(220, 228, 240, 0.55); font-weight: 300; }
+.rk-name { display: flex; flex-direction: column; min-width: 0; }
+.rk-name-main { display: flex; align-items: baseline; gap: 0.8em; min-width: 0; }
+.rk-name-text { color: #f1f4f9; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rk-tag {
+  flex: none; font-size: 0.62em; color: var(--gold); font-weight: 600;
+  border-left: 1px solid rgba(242, 178, 51, 0.6); padding-left: 0.8em;
+}
+.rk-name small {
+  font-size: 0.55em; letter-spacing: 0.1em; color: #8d9bb1; font-weight: 400; margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rk-points { color: var(--gold); font-weight: 700; white-space: nowrap; text-align: right; }
+.rk-points span { font-size: 0.65em; margin-left: 0.25em; color: #d9a43a; }
+.rk-row.top1 .rk-rank, .rk-row.top1 .rk-points { text-shadow: 0 0 12px rgba(242, 178, 51, 0.6); }
+
+.rk-empty, .rk-alert { margin: 0; font-size: clamp(1rem, 1.4vw, 1.25rem); letter-spacing: 0.04em; color: #b8c3d4; }
+.rk-alert { color: #ffd0d5; }
+.rk-foot { margin: 0; font-size: 0.78rem; letter-spacing: 0.08em; color: #6f7e95; text-transform: uppercase; }
+.rk-foot a { color: #8fc6f5; }
+
+
+/* ---------- Ecrãs estreitos: arte em cima, leaderboard em baixo ---------- */
+@media (max-width: 900px) {
+  .rk-art {
+    position: relative; width: 100%; height: min(70vw, 460px);
+    background-position: 46% 50%;
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  }
+  .rk-layout { min-height: 0; padding-top: 8px; display: block; }
+  .rk-board { width: 100%; }
+  .rk-row { grid-template-columns: 2.2em 1ch minmax(0, 1fr) 1ch auto; column-gap: 0.55em; }
+  .rk-tag { display: none; }
+}

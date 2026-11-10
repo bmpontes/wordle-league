@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar · Forense Wordle League</title>
+  <link rel="icon" href="/img/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="narrow">
+    <div class="auth-wrap">
+      <div class="card auth-card">
+        <div class="auth-logo">
+          <img src="/img/emblem-384.webp" alt="Emblema COCIBER — Investigação Digital" width="180" height="180">
+          <h1>Forense Wordle League</h1>
+          <span class="brand-sub">COCIBER · INVESTIGAÇÃO DIGITAL</span>
+          <div class="mini-grid" aria-hidden="true"><span class="c"></span><span class="p"></span><span></span><span class="c"></span><span class="p"></span></div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login">Entrar</button>
+          <button type="button" class="tab hidden" role="tab" id="tab-register" aria-selected="false" aria-controls="form-register">Criar conta</button>
+        </div>
+
+        <div id="auth-alert"></div>
+
+        <form id="form-login" autocomplete="on" novalidate>
+          <div class="field">
+            <label for="login-username">Nome de utilizador</label>
+            <input type="text" id="login-username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="32">
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required maxlength="200">
+          </div>
+          <button class="btn primary" type="submit">Entrar</button>
+          <p class="muted"><a href="/ranking">Ver a classificação</a></p>
+        </form>
+
+        <form id="form-register" class="hidden" autocomplete="on" novalidate>
+          <div class="field">
+            <label for="reg-username">Nome de utilizador</label>
+            <input type="text" id="reg-username" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="32" pattern="[a-z0-9._\-]+">
+            <small class="muted">3 a 32 caracteres: minúsculas, números, ponto, hífen ou underscore.</small>
+          </div>
+          <div class="field">
+            <label for="reg-display">Nome de apresentação</label>
+            <input type="text" id="reg-display" autocomplete="nickname" required minlength="2" maxlength="40">
+          </div>
+          <div class="field">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" autocomplete="new-password" required minlength="10" maxlength="200">
+            <small class="muted">Mínimo de 10 caracteres.</small>
+          </div>
+          <div class="field">
+            <label for="reg-password2">Confirmar password</label>
+            <input type="password" id="reg-password2" autocomplete="new-password" required minlength="10" maxlength="200">
+          </div>
+          <button class="btn primary" type="submit">Criar conta</button>
+        </form>
+      </div>
+    </div>
+  </main>
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/login.js"></script>
+</body>
+</html>

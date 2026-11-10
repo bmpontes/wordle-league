@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Classificação do mês · Forense Wordle League</title>
+  <link rel="icon" href="/img/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/ranking.css">
+</head>
+<body class="rk-page">
+  <div class="rk-art" role="img" aria-label="Emblema COCIBER — Investigação Digital"></div>
+
+  <main class="rk-layout">
+    <section class="rk-board" aria-labelledby="rk-heading">
+      <header class="rk-head">
+        <p class="rk-kicker">Forense Wordle League</p>
+        <h1 id="rk-heading" class="rk-title">Classificação <span id="season">—</span></h1>
+        <span class="rk-rule"></span>
+        <p class="rk-meta" id="days-left"></p>
+      </header>
+
+      <ol class="rk-list" id="list" aria-label="Classificação do mês"></ol>
+      <p class="rk-empty hidden" id="empty">Ainda não há pontos este mês.</p>
+      <p class="rk-alert hidden" id="alert" role="alert"></p>
+
+      <p class="rk-foot"><span id="updated"></span> · <a href="/login">Entrar para jogar</a></p>
+    </section>
+  </main>
+
+  <script src="/js/api.js"></script>
+  <script src="/js/common.js"></script>
+  <script src="/js/ranking.js"></script>
+</body>
+</html>

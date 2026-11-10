@@ -1,0 +1,9 @@
+# EXEMPLO DE FORMATO — NÃO É UMA LISTA DEFINITIVA
+# Ficheiro TXT: uma palavra por linha, codificação UTF-8.
+# Linhas vazias e linhas começadas por # são ignoradas.
+# Maiúsculas/minúsculas são indiferentes; acentos são preservados para apresentação.
+CASAS
+LIVRO
+PEDRA
+NOITE
+NUVEM
