@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Classificação · Wordle League</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0e1728">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wordle League">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-title="Classificação">
+  <header class="topbar">
+    <a class="brand" href="./">
+      <img src="img/default-logo.svg" alt="" width="42" height="42" data-brand-logo>
+      <span class="brand-text"><span class="brand-title" data-brand="name">Wordle League</span><span class="brand-sub" data-brand="tagline"></span></span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="./" data-player>Jogar</a>
+      <a href="leaderboard.html">Classificação</a>
+      <a href="profile.html">Perfil</a>
+      <a href="regras.html">Regras</a>
+      <a href="admin.html" data-admin>Admin</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Classificação</h1>
+    <div class="card">
+      <div class="tabs" role="tablist" aria-label="Tipo de classificação">
+        <button type="button" class="tab" role="tab" data-board="daily" aria-selected="true">Diária</button>
+        <button type="button" class="tab" role="tab" data-board="monthly" aria-selected="false">Mensal</button>
+        <button type="button" class="tab" role="tab" data-board="alltime" aria-selected="false">Desde sempre</button>
+      </div>
+      <div class="row" id="filters">
+        <div class="field" id="filter-date">
+          <label for="board-date">Dia</label>
+          <input type="date" id="board-date">
+        </div>
+        <div class="field hidden" id="filter-season">
+          <label for="board-season">Época (mês)</label>
+          <select id="board-season"></select>
+        </div>
+      </div>
+      <p class="muted" id="board-caption"></p>
+      <div id="board-alert"></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Nome</th>
+              <th scope="col" class="num">Pontos</th>
+              <th scope="col" class="num">Vitórias</th>
+              <th scope="col" class="num">Sucesso</th>
+              <th scope="col" class="num">Melhor streak</th>
+              <th scope="col" class="num" id="col-extra">Tentativas</th>
+            </tr>
+          </thead>
+          <tbody id="board-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <footer data-brand="footer">Uso interno</footer>
+  <script src="js/vendor/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/leaderboard.js"></script>
+</body>
+</html>

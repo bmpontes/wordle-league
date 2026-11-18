@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Regras · Wordle League</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0e1728">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wordle League">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-title="Regras">
+  <header class="topbar">
+    <a class="brand" href="./">
+      <img src="img/default-logo.svg" alt="" width="42" height="42" data-brand-logo>
+      <span class="brand-text"><span class="brand-title" data-brand="name">Wordle League</span><span class="brand-sub" data-brand="tagline"></span></span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="./" data-player>Jogar</a>
+      <a href="leaderboard.html">Classificação</a>
+      <a href="profile.html">Perfil</a>
+      <a href="regras.html">Regras</a>
+      <a href="admin.html" data-admin>Admin</a>
+    </nav>
+  </header>
+
+  <main class="rules">
+    <h1>Regras</h1>
+    <div id="rules-alert"></div>
+    <div id="rules"></div>
+  </main>
+
+  <footer data-brand="footer">Uso interno</footer>
+  <script src="js/vendor/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/regras.js"></script>
+</body>
+</html>

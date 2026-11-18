@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Classificação do mês · Wordle League</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0e1728">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wordle League">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/ranking.css">
+</head>
+<body class="rk-page" data-title="Classificação do mês">
+  <div class="rk-art" id="rk-art" aria-hidden="true"></div>
+
+  <main class="rk-layout">
+    <section class="rk-board" aria-labelledby="rk-heading">
+      <header class="rk-head">
+        <p class="rk-kicker" data-brand="name">Wordle League</p>
+        <h1 id="rk-heading" class="rk-title">Classificação <span id="season">—</span></h1>
+        <span class="rk-rule"></span>
+        <p class="rk-meta" id="days-left"></p>
+      </header>
+
+      <ol class="rk-list" id="list" aria-label="Classificação do mês"></ol>
+      <p class="rk-empty hidden" id="empty">Ainda não há pontos este mês.</p>
+      <p class="rk-alert hidden" id="alert" role="alert"></p>
+
+      <p class="rk-foot"><span id="updated"></span> · <a href="login.html">Entrar para jogar</a></p>
+    </section>
+  </main>
+
+  <script src="js/vendor/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/ranking.js"></script>
+</body>
+</html>

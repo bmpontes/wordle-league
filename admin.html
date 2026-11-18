@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Administração · Wordle League</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0e1728">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wordle League">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-title="Administração">
+  <header class="topbar">
+    <a class="brand" href="./">
+      <img src="img/default-logo.svg" alt="" width="42" height="42" data-brand-logo>
+      <span class="brand-text"><span class="brand-title" data-brand="name">Wordle League</span><span class="brand-sub" data-brand="tagline"></span></span>
+    </a>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="./" data-player>Jogar</a>
+      <a href="leaderboard.html">Classificação</a>
+      <a href="profile.html">Perfil</a>
+      <a href="regras.html">Regras</a>
+      <a href="admin.html" data-admin>Admin</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Administração</h1>
+    <div class="tabs admin-nav" role="tablist" aria-label="Secções de administração">
+      <button type="button" class="tab" role="tab" data-section="status" aria-selected="true">Estado</button>
+      <button type="button" class="tab" role="tab" data-section="words" aria-selected="false">Palavras</button>
+      <button type="button" class="tab" role="tab" data-section="users" aria-selected="false">Utilizadores</button>
+      <button type="button" class="tab" role="tab" data-section="settings" aria-selected="false">Parâmetros</button>
+      <button type="button" class="tab" role="tab" data-section="stats" aria-selected="false">Estatísticas</button>
+      <button type="button" class="tab" role="tab" data-section="points" aria-selected="false">Ajustes de pontos</button>
+      <button type="button" class="tab" role="tab" data-section="brand" aria-selected="false">Personalização</button>
+      <button type="button" class="tab" role="tab" data-section="audit" aria-selected="false">Auditoria</button>
+    </div>
+    <div id="admin-alert"></div>
+
+    <!-- Estado -->
+    <section id="section-status" data-panel>
+      <div id="status-warnings"></div>
+      <div class="card">
+        <h2>Estado da aplicação</h2>
+        <div class="stats" id="status-stats"></div>
+        <p class="muted" id="status-meta"></p>
+      </div>
+    </section>
+
+    <!-- Palavras -->
+    <section id="section-words" data-panel class="hidden">
+      <div id="words-pool"></div>
+      <div class="grid-2" id="word-lists"></div>
+      <div class="card">
+        <h2>Importações recentes</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Lista</th><th>Ficheiro</th><th>Modo</th><th class="num">Válidas</th><th class="num">Inválidas</th><th class="num">Duplicadas</th><th class="num">Inseridas</th><th>Por</th></tr></thead>
+            <tbody id="imports-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Utilizadores -->
+    <section id="section-users" data-panel class="hidden">
+      <div class="card">
+        <h2>Criar utilizador</h2>
+        <form id="form-user" class="row" novalidate>
+          <div class="field"><label for="nu-username">Nome de utilizador</label><input type="text" id="nu-username" autocomplete="off" autocapitalize="none" required></div>
+          <div class="field"><label for="nu-display">Nome de apresentação</label><input type="text" id="nu-display" autocomplete="off" required></div>
+          <div class="field"><label for="nu-password">Password inicial</label><input type="password" id="nu-password" autocomplete="new-password" required></div>
+          <div class="field"><label for="nu-role">Papel</label><select id="nu-role"><option value="user">Utilizador</option><option value="admin">Administrador</option></select></div>
+          <div class="field"><button class="btn primary" type="submit">Criar</button></div>
+        </form>
+        <div id="user-alert"></div>
+      </div>
+      <div class="card">
+        <h2>Utilizadores</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Utilizador</th><th>Nome</th><th>Papel</th><th>Estado</th><th>Último login</th><th>Ações</th></tr></thead>
+            <tbody id="users-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Parâmetros -->
+    <section id="section-settings" data-panel class="hidden">
+      <div class="card">
+        <h2>Parâmetros do jogo</h2>
+        <p class="muted">As alterações ao tamanho das palavras, número de tentativas e política de acentos aplicam-se a partir do próximo desafio. Os pontos já atribuídos nunca são recalculados. Todas as alterações ficam registadas na auditoria.</p>
+        <form id="form-settings" novalidate>
+          <div class="row">
+            <div class="field"><label for="s-word_length">Letras por palavra</label><input type="number" id="s-word_length" min="3" max="10"></div>
+            <div class="field"><label for="s-max_attempts">Tentativas</label><input type="number" id="s-max_attempts" min="1" max="10"></div>
+            <div class="field"><label for="s-accent_mode">Acentos</label>
+              <select id="s-accent_mode"><option value="strip">Ignorar acentos e cedilha (Á = A)</option><option value="strict">Acentos contam (Á ≠ A)</option></select></div>
+          </div>
+          <div class="field"><label for="s-points_by_attempt">Pontos por vitória na tentativa 1, 2, 3… (separados por vírgulas)</label><input type="text" id="s-points_by_attempt"></div>
+          <div class="row">
+            <div class="field"><label for="s-points_loss">Pontos por participação sem vitória</label><input type="number" id="s-points_loss" min="0"></div>
+            <div class="field"><label for="s-streak_bonus_days">Bónus de streak a cada N dias</label><input type="number" id="s-streak_bonus_days" min="2"></div>
+            <div class="field"><label for="s-streak_bonus_points">Pontos do bónus</label><input type="number" id="s-streak_bonus_points" min="0"></div>
+            <div class="field"><label for="s-streak_mode">Contagem da streak</label>
+              <select id="s-streak_mode"><option value="wins">Dias seguidos com vitória</option><option value="participation">Dias seguidos a jogar</option></select></div>
+          </div>
+          <div class="row">
+            <div class="field"><label for="s-play_start">Jogo abre às (hora de Portugal)</label><input type="time" id="s-play_start" step="60"></div>
+            <div class="field"><label for="s-play_end">Jogo fecha às (00:00 = meia-noite)</label><input type="time" id="s-play_end" step="60"></div>
+            <div class="field"><label for="s-podium_bonus_points">Bónus para o 1.º, 2.º, 3.º… a acertar no dia (separados por vírgulas; vazio = sem bónus)</label><input type="text" id="s-podium_bonus_points"></div>
+          </div>
+          <div class="field"><label class="check"><input type="checkbox" id="s-registration_enabled"> Permitir registo de novas contas</label></div>
+          <div class="field"><label class="check"><input type="checkbox" id="s-recycle_words"> Reutilizar palavras quando a lista secreta se esgotar</label></div>
+          <div class="field"><label class="check"><input type="checkbox" id="s-public_leaderboard"> Classificação pública em <a href="ranking.html" target="_blank" rel="noopener">/ranking</a> (sem autenticação)</label></div>
+          <div id="settings-alert"></div>
+          <button class="btn primary" type="submit">Guardar parâmetros</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Estatísticas -->
+    <section id="section-stats" data-panel class="hidden">
+      <div class="card">
+        <h2>Estatísticas globais</h2>
+        <div class="stats" id="global-stats"></div>
+      </div>
+      <div class="card">
+        <h2>Desafios anteriores</h2>
+        <p class="muted">A palavra do dia corrente nunca é mostrada.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Palavra</th><th class="num">Jogadores</th><th class="num">Vitórias</th><th class="num">Média tentativas</th></tr></thead>
+            <tbody id="challenges-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ajustes de pontos -->
+    <section id="section-points" data-panel class="hidden">
+      <div class="card">
+        <h2>Novo ajuste de pontos</h2>
+        <p class="muted">Os resultados nunca são alterados. Um ajuste cria um novo movimento, com motivo obrigatório, visível para o utilizador e registado na auditoria.</p>
+        <form id="form-adjust" class="row" novalidate>
+          <div class="field"><label for="adj-user">Utilizador</label><select id="adj-user"></select></div>
+          <div class="field"><label for="adj-points">Pontos (+/-)</label><input type="number" id="adj-points" min="-1000" max="1000"></div>
+          <div class="field"><label for="adj-reason">Motivo</label><input type="text" id="adj-reason" maxlength="200"></div>
+          <div class="field"><button class="btn primary" type="submit">Registar ajuste</button></div>
+        </form>
+        <div id="adjust-alert"></div>
+      </div>
+      <div class="card">
+        <h2>Ajustes registados</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Utilizador</th><th class="num">Pontos</th><th>Motivo</th><th>Época</th><th>Por</th></tr></thead>
+            <tbody id="adjust-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Personalização -->
+    <section id="section-brand" data-panel class="hidden">
+      <div class="card">
+        <h2>Nome e textos</h2>
+        <p class="muted">Aparecem em todas as páginas: cabeçalho, login, títulos do separador, rodapé e página /ranking.</p>
+        <form id="form-brand" novalidate>
+          <div class="row">
+            <div class="field"><label for="b-brand_name">Nome do jogo</label><input type="text" id="b-brand_name" maxlength="40"></div>
+            <div class="field"><label for="b-brand_tagline">Subtítulo (opcional)</label><input type="text" id="b-brand_tagline" maxlength="60"></div>
+          </div>
+          <div class="field"><label for="b-brand_footer">Rodapé (opcional)</label><input type="text" id="b-brand_footer" maxlength="120"></div>
+          <div class="field"><label class="check"><input type="checkbox" id="b-brand_logo_round"> Mostrar o logótipo recortado em círculo</label></div>
+          <div id="brand-text-alert"></div>
+          <button class="btn primary" type="submit">Guardar</button>
+        </form>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h2>Logótipo</h2>
+          <p class="muted">PNG, JPEG ou WEBP, de preferência quadrado, até 2 MB. Usado no cabeçalho, no login, no ícone do separador e no /ranking.</p>
+          <img class="brand-preview" id="brand-logo-preview" src="img/default-logo.svg" alt="Logótipo atual">
+          <div class="field"><input type="file" id="brand-logo-file" accept="image/png,image/jpeg,image/webp"></div>
+          <button type="button" class="btn" id="brand-logo-upload">Carregar logótipo</button>
+          <button type="button" class="btn danger" id="brand-logo-remove">Repor o predefinido</button>
+          <div id="brand-logo-alert"></div>
+        </div>
+        <div class="card">
+          <h2>Imagem do /ranking (opcional)</h2>
+          <p class="muted">Imagem grande do lado direito da página /ranking (por exemplo, um cartaz da equipa, ao alto). Sem imagem, é usado o logótipo com um fundo neutro.</p>
+          <img class="brand-preview wide hidden" id="brand-ranking-preview" alt="Imagem atual do ranking">
+          <p class="muted" id="brand-ranking-none">A usar o logótipo.</p>
+          <div class="field"><input type="file" id="brand-ranking-file" accept="image/png,image/jpeg,image/webp"></div>
+          <button type="button" class="btn" id="brand-ranking-upload">Carregar imagem</button>
+          <button type="button" class="btn danger" id="brand-ranking-remove">Remover (usar o logótipo)</button>
+          <div id="brand-ranking-alert"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auditoria -->
+    <section id="section-audit" data-panel class="hidden">
+      <div class="card">
+        <h2>Registo de auditoria</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Ator</th><th>Ação</th><th>Alvo</th><th>Detalhes</th></tr></thead>
+            <tbody id="audit-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer data-brand="footer">Uso interno</footer>
+  <script src="js/vendor/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="js/normalize.js"></script>
+  <script src="js/words-file.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

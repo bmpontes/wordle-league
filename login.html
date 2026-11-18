@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Entrar · Wordle League</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://*.supabase.co; connect-src 'self' https://*.supabase.co wss://*.supabase.co; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#0e1728">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wordle League">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-title="Entrar">
+  <main class="narrow">
+    <div class="auth-wrap">
+      <div class="card auth-card">
+        <div class="auth-logo">
+          <img src="img/default-logo.svg" alt="Logótipo" width="180" height="180" data-brand-logo>
+          <h1 data-brand="name">Wordle League</h1>
+          <span class="brand-sub" data-brand="tagline"></span>
+          <div class="mini-grid" aria-hidden="true"><span class="c"></span><span class="p"></span><span></span><span class="c"></span><span class="p"></span></div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button type="button" class="tab" role="tab" id="tab-login" aria-selected="true" aria-controls="form-login">Entrar</button>
+          <button type="button" class="tab hidden" role="tab" id="tab-register" aria-selected="false" aria-controls="form-register">Criar conta</button>
+        </div>
+
+        <div id="auth-alert"></div>
+
+        <form id="form-login" autocomplete="on" novalidate>
+          <div class="field">
+            <label for="login-username">Nome de utilizador</label>
+            <input type="text" id="login-username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required maxlength="32">
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" name="password" autocomplete="current-password" required maxlength="200">
+          </div>
+          <button class="btn primary" type="submit">Entrar</button>
+          <p class="muted"><a href="ranking.html">Ver a classificação</a></p>
+        </form>
+
+        <form id="form-register" class="hidden" autocomplete="on" novalidate>
+          <div class="field">
+            <label for="reg-username">Nome de utilizador</label>
+            <input type="text" id="reg-username" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="32" pattern="[a-z0-9._\-]+">
+            <small class="muted">3 a 32 caracteres: minúsculas, números, ponto, hífen ou underscore.</small>
+          </div>
+          <div class="field">
+            <label for="reg-display">Nome de apresentação</label>
+            <input type="text" id="reg-display" autocomplete="nickname" required minlength="2" maxlength="40">
+          </div>
+          <div class="field">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" autocomplete="new-password" required minlength="10" maxlength="200">
+            <small class="muted">Mínimo de 10 caracteres.</small>
+          </div>
+          <div class="field">
+            <label for="reg-password2">Confirmar password</label>
+            <input type="password" id="reg-password2" autocomplete="new-password" required minlength="10" maxlength="200">
+          </div>
+          <button class="btn primary" type="submit">Criar conta</button>
+        </form>
+      </div>
+    </div>
+  </main>
+  <script src="js/vendor/supabase.js"></script>
+  <script src="config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

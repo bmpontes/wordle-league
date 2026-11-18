@@ -1,13 +1,15 @@
 # Wordle League
 
-Jogo de palavras diário, inspirado no Wordle, para equipas e organizações. **O nome, o subtítulo, o rodapé e o logótipo são personalizáveis no painel**, sem mexer em código. Tem pontuação, streaks, bónus, classificações diária, mensal e de sempre, e um painel de administração.
+Jogo de palavras diário, inspirado no Wordle, para equipas e grupos de amigos. Tem pontuação, streaks, bónus, classificações diária, mensal e desde sempre, e um painel de administração. **O nome, o subtítulo, o rodapé e o logótipo são personalizáveis no painel**, sem mexer em código.
 
 - **Uma palavra por dia, igual para todos.** Muda à meia-noite de Portugal (`Europe/Lisbon`) e só se pode jogar no período definido (por omissão, das 09:30 às 00:00).
-- **Avaliação feita só no servidor.** A palavra secreta nunca chega ao browser antes de o jogador terminar.
-- **Funciona sem Internet.** Não usa APIs externas; as palavras são importadas pelo administrador (TXT/CSV).
-- **Tecnologia simples:** Node.js + Express, SQLite e HTML/CSS/JS sem frameworks. Instala-se no Windows com scripts PowerShell ou em Linux com Docker.
+- **App para iPhone e Android.** É uma *web app* (PWA): abre-se no Safari e instala-se no ecrã principal com **Partilhar → Adicionar ao ecrã principal**. Também funciona em qualquer computador.
+- **Sem servidor próprio e sem custos.** O site está no **GitHub Pages** e os dados no **Supabase** (plano gratuito). Não é preciso ter nenhum computador ligado.
+- **A palavra secreta nunca chega ao browser antes de o jogador terminar.** A avaliação das tentativas e a pontuação são feitas dentro da base de dados.
 
 > **As listas de palavras não estão neste repositório.** A lista de palavras secretas revelaria as respostas. Importe as listas no painel depois de instalar (ver [Listas de palavras](#listas-de-palavras)).
+
+> A versão anterior, com servidor Node.js + SQLite (Windows/Docker), continua disponível na marca `v1.5.0-servidor`.
 
 ---
 
@@ -15,19 +17,15 @@ Jogo de palavras diário, inspirado no Wordle, para equipas e organizações. **
 
 - [Funcionalidades](#funcionalidades)
 - [Instalação](#instalação)
-  - [Windows (produção)](#windows-produção)
-  - [Linux com Docker](#linux-com-docker)
-  - [Desenvolvimento local](#desenvolvimento-local)
-- [Primeiro administrador](#primeiro-administrador)
+- [Instalar no telemóvel](#instalar-no-telemóvel)
 - [Listas de palavras](#listas-de-palavras)
 - [Personalização](#personalização)
-- [Configuração](#configuração)
+- [Parâmetros do jogo](#parâmetros-do-jogo)
 - [Regras e pontuação](#regras-e-pontuação)
-- [Operação: backups, restauro e atualizações](#operação-backups-restauro-e-atualizações)
+- [Como funciona](#como-funciona)
 - [Segurança](#segurança)
-- [Testes](#testes)
-- [Arquitetura](#arquitetura)
-- [API](#api)
+- [Custos e limites](#custos-e-limites)
+- [Desenvolvimento e testes](#desenvolvimento-e-testes)
 - [Decisões técnicas e limitações](#decisões-técnicas-e-limitações)
 
 ---
@@ -36,101 +34,35 @@ Jogo de palavras diário, inspirado no Wordle, para equipas e organizações. **
 
 | Página | Quem | O que faz |
 |---|---|---|
-| `/` **Jogar** | jogadores | Grelha do jogo, teclado virtual e físico, e contagem decrescente até à abertura ou ao fecho. No fim mostra a palavra, os pontos e os bónus. |
-| `/leaderboard` **Classificação** | jogadores e admin | Classificação diária (por data), mensal (com histórico de meses) e desde sempre. |
-| `/profile` **Perfil** | jogadores e admin | Jogos, vitórias, % de vitórias, distribuição por tentativas, streak atual e melhor, melhor posição mensal, histórico e origem de cada ponto. Permite também alterar a password. |
-| `/regras` **Regras** | todos com sessão | Regras do jogo geradas a partir dos parâmetros atuais: se o admin os mudar, o texto muda sozinho. |
-| `/admin` **Admin** | administradores | Estado, palavras (importar/exportar), utilizadores (criar, bloquear, renomear, redefinir password), parâmetros, personalização, estatísticas, ajustes de pontos e auditoria. |
-| `/ranking` **Ranking público** | qualquer pessoa (desativável) | Classificação **do mês em curso**, pensada para ficar aberta num ecrã da secção. Atualiza-se a cada minuto. |
-| `/login` | — | Entrar e criar conta (o registo pode ser desligado). |
+| **Jogar** (`index.html`) | jogadores | Grelha do jogo, teclado virtual e físico, e contagem decrescente até à abertura ou ao fecho. No fim mostra a palavra, os pontos e os bónus. |
+| **Classificação** | jogadores e admin | Classificação diária (por data), mensal (com histórico de meses) e desde sempre. |
+| **Perfil** | jogadores e admin | Jogos, vitórias, % de vitórias, distribuição por tentativas, streak atual e melhor, melhor posição mensal, histórico e origem de cada ponto. Permite também alterar a password. |
+| **Regras** | todos com sessão | Regras do jogo geradas a partir dos parâmetros atuais: se o admin os mudar, o texto muda sozinho. |
+| **Admin** | administradores | Estado, palavras (importar/exportar), utilizadores (criar, bloquear, renomear, redefinir password), parâmetros, personalização, estatísticas, ajustes de pontos e auditoria. |
+| **Ranking público** (`ranking.html`) | qualquer pessoa (desativável) | Classificação **do mês em curso**, pensada para ficar aberta num ecrã. Atualiza-se a cada minuto. |
+| **Entrar** (`login.html`) | — | Entrar e criar conta (o registo pode ser desligado). |
 
 Outros pormenores:
 - Interface em português de Portugal, com tema escuro, adaptada a desktop, tablet e telemóvel.
-- Nome, subtítulo, rodapé, logótipo e imagem do `/ranking` configuráveis em **Admin → Personalização** (ver [Personalização](#personalização)).
 - Modo para daltonismo (botão ◐ no menu).
 - Os administradores não têm o separador "Jogar" e entram diretamente no painel.
 
 ## Instalação
 
-Requisito comum: **Node.js 22.9 ou superior** (recomendado: 24 LTS), ou Docker.
+São cerca de 15 minutos, sem instalar nada no computador. O guia passo a passo está em **[COMO-INSTALAR.md](COMO-INSTALAR.md)**. Em resumo:
 
-### Windows (produção)
+1. Criar um projeto gratuito no **Supabase**, colar o [`supabase/1-esquema.sql`](supabase/1-esquema.sql) no *SQL Editor* e carregar em **Run**.
+2. Em **Authentication**, desligar a confirmação por email.
+3. Copiar o endereço do projeto e a chave pública para o [`config.js`](config.js).
+4. Ligar o **GitHub Pages** neste repositório (ramo `main`, pasta `/`).
+5. Abrir o site e **criar a primeira conta: fica automaticamente administradora**. Depois, importar as listas de palavras no painel.
 
-É a forma recomendada para uma máquina Windows. A aplicação corre como **tarefa do Windows**: arranca com o sistema, reinicia se falhar e faz um **backup diário**. O guia completo, com resolução de problemas, está em **[INSTALACAO-WINDOWS.md](INSTALACAO-WINDOWS.md)**.
+## Instalar no telemóvel
 
-Resumo, num PowerShell **como Administrador**:
+- **iPhone/iPad:** abra o site no **Safari** → botão **Partilhar** → **Adicionar ao ecrã principal**.
+- **Android:** abra no **Chrome** → menu **⋮** → **Instalar aplicação** (ou *Adicionar ao ecrã principal*).
 
-```powershell
-# 1. Instalar o Node.js 24 LTS (https://nodejs.org) e abrir uma NOVA janela do PowerShell
-
-# 2. Obter o código para uma pasta fixa
-git clone https://github.com/bmpontes/FOR_Wordle_League.git C:\WordleLeague
-#    (sem git: descarregar o ZIP do GitHub em "Code → Download ZIP" e extrair para C:\WordleLeague)
-
-# 3. Instalar (dependências, .env, administrador, firewall, tarefas de arranque e backup)
-cd C:\WordleLeague
-powershell -ExecutionPolicy Bypass -File .\windows\instalar.ps1
-```
-
-No fim, abra `http://<nome-da-máquina>:3000`, entre como administrador e importe as listas de palavras.
-
-| Ação | Comando (na pasta da aplicação) |
-|---|---|
-| Estado / registo | `powershell -ExecutionPolicy Bypass -File .\windows\servico.ps1 -Acao estado` (ou `-Acao registo`) |
-| Parar / iniciar / reiniciar | `... servico.ps1 -Acao parar` · `iniciar` · `reiniciar` (como Administrador) |
-| Backup manual | `powershell -ExecutionPolicy Bypass -File .\windows\backup.ps1` |
-| Atualizar | ver [Atualizações](#atualizar-para-uma-nova-versão) |
-| Desinstalar (mantém os dados) | `powershell -ExecutionPolicy Bypass -File .\windows\desinstalar.ps1` |
-
-> O PowerShell pode recusar `npm` com "a execução de scripts está desativada". Nesse caso use `npm.cmd` (por exemplo `npm.cmd run create-admin`) ou chame o Node diretamente: `node --env-file-if-exists=.env scripts\create-admin.js`.
-
-### Linux com Docker
-
-Requisitos: Docker Engine 24+ com Docker Compose v2.24+.
-
-```bash
-git clone https://github.com/bmpontes/FOR_Wordle_League.git
-cd FOR_Wordle_League
-cp .env.example .env          # editar: ADMIN_USERNAME / ADMIN_PASSWORD (ver abaixo), APP_PORT
-docker compose up -d --build
-docker compose logs -f app
-```
-
-Os dados (base SQLite, segredo de sessão e backups) ficam no volume **`forense-wordle-league_wordle-data`**, montado em `/app/data`, e sobrevivem a `docker compose down` e a reconstruções. **Não use `docker compose down -v`**, porque apaga o volume.
-
-Opcionalmente, pode usar o Nginx como reverse proxy (HTTPS): `docker compose --profile proxy up -d --build`. Veja [nginx/nginx.conf](nginx/nginx.conf) e defina `TRUST_PROXY=1` e `COOKIE_SECURE=true` no `.env`.
-
-### Desenvolvimento local
-
-```bash
-npm ci
-cp .env.example .env          # para desenvolvimento: NODE_ENV=development
-npm run create-admin
-npm run dev                   # http://localhost:3000, reinicia ao alterar ficheiros
-npm test
-```
-
-Os scripts `npm` carregam o `.env` automaticamente (`node --env-file-if-exists=.env`). Os módulos nativos (`better-sqlite3` 12.x e `argon2`) têm binários pré-compilados para Windows, Linux e macOS, por isso não é preciso compilador.
-
-## Primeiro administrador
-
-O código não tem credenciais predefinidas. Há três formas de criar o primeiro administrador:
-
-1. **Interativo (recomendado):** o `windows\instalar.ps1` pergunta durante a instalação. Também pode correr:
-   ```bash
-   npm run create-admin                                    # ou: node --env-file-if-exists=.env scripts/create-admin.js
-   docker compose exec -it app node scripts/create-admin.js
-   ```
-   A password não aparece no ecrã. O mesmo comando cria administradores adicionais.
-2. **Variáveis de ambiente:** defina `ADMIN_USERNAME`, `ADMIN_PASSWORD` e opcionalmente `ADMIN_DISPLAY_NAME` no `.env`. A conta é criada no arranque se ainda não houver nenhum administrador ativo. **Depois apague `ADMIN_PASSWORD` do `.env`.**
-3. **No painel:** um administrador cria outros em **Admin → Utilizadores**.
-
-Regras das contas:
-- nome de utilizador com 3 a 32 caracteres (`a-z 0-9 . _ -`), único;
-- password com pelo menos 10 caracteres, sem conter o nome de utilizador, guardada com **Argon2id**;
-- depois de 5 passwords erradas, a conta fica bloqueada 15 minutos (reiniciar a aplicação limpa o bloqueio).
-
-**Esqueceu-se da password de administrador?** Crie outro administrador com `create-admin`, entre com ele e use **Admin → Utilizadores → Redefinir password**.
+A app abre em ecrã inteiro, com ícone próprio, e recebe as atualizações automaticamente.
 
 ## Listas de palavras
 
@@ -156,7 +88,7 @@ Veja os exemplos em [examples/](examples/).
 
 **Avisos:** o painel avisa quando não há lista, quando restam 7 ou menos palavras secretas e quando a lista se esgota. A lista não recomeça sozinha, a menos que ative **Reutilizar palavras**.
 
-> **Guarde as listas reais fora do repositório.** A pasta [listas/](listas/LEIA-ME.md) existe para isso e o conteúdo está no `.gitignore`. **Nunca** publique a lista de palavras secretas.
+> **Guarde as listas reais fora do repositório.** A pasta [listas/](listas/LEIA-ME.md) existe para isso e o conteúdo está no `.gitignore` (este repositório é público). **Nunca** publique a lista de palavras secretas.
 
 **Fontes de listas de palavras aceites (inglês):**
 - [ENABLE](https://raw.githubusercontent.com/dolph/dictionary/master/enable1.txt): domínio público.
@@ -166,7 +98,7 @@ Use estas fontes **só** como palavras aceites, nunca como secretas: têm muitas
 
 ## Personalização
 
-Tudo se configura em **Admin → Personalização** e aplica-se a todas as páginas (cabeçalho, login, títulos do separador, ícone do browser, rodapé e `/ranking`):
+Tudo se configura em **Admin → Personalização** e aplica-se a todas as páginas (cabeçalho, login, títulos do separador, rodapé e ranking público):
 
 | Opção | Omissão | Notas |
 |---|---|---|
@@ -174,30 +106,13 @@ Tudo se configura em **Admin → Personalização** e aplica-se a todas as pági
 | Subtítulo | `Desafio diário de palavras` | Opcional (vazio = não aparece). |
 | Rodapé | `Uso interno` | Opcional. |
 | Logótipo | "W" neutro | PNG, JPEG ou WEBP, de preferência quadrado, até 2 MB. Opção para o recortar em círculo. |
-| Imagem do `/ranking` | — | Opcional: imagem grande (ao alto) do lado direito do ranking público. Sem ela, é usado o logótipo com brilho sobre um fundo neutro. |
+| Imagem do ranking público | — | Opcional: imagem grande (ao alto) do lado direito. Sem ela, é usado o logótipo com brilho sobre um fundo neutro. |
 
-As imagens são guardadas **na base de dados** (tabela `brand_assets`), por isso entram nos backups automáticos e sobrevivem a atualizações. Por segurança, o tipo é verificado pelo conteúdo do ficheiro e **não são aceites SVG** (podem conter scripts).
+As imagens ficam no **Storage do Supabase** (pasta pública `marca`); só administradores as podem enviar ou apagar. O tipo é verificado pelo conteúdo do ficheiro e **não são aceites SVG** (podem conter scripts). O ícone da app instalada no telemóvel é sempre o "W" predefinido (pasta [`icons/`](icons/)).
 
-## Configuração
+## Parâmetros do jogo
 
-### Variáveis de ambiente (`.env`)
-
-| Variável | Omissão | Descrição |
-|---|---|---|
-| `PORT` / `HOST` | `3000` / `0.0.0.0` | Porta e interface do servidor. |
-| `APP_PORT` | `3000` | Porta publicada no anfitrião (só Docker). |
-| `DATA_DIR` / `DB_FILE` | `./data` / `$DATA_DIR/wordle.sqlite` | Dados persistentes e base SQLite. |
-| `APP_TIMEZONE` | `Europe/Lisbon` | Fuso do desafio diário e do período de jogo. |
-| `SESSION_SECRET` | *(gerado)* | Mínimo de 32 caracteres. Se ficar vazio, é gerado e guardado em `$DATA_DIR/.session_secret`. |
-| `SESSION_MAX_AGE_HOURS` | `12` | Duração da sessão (renovada com a atividade). |
-| `COOKIE_SECURE` | `false` | `true` quando a aplicação é servida por HTTPS. |
-| `TRUST_PROXY` | `0` | `1` atrás de um reverse proxy. |
-| `LOGIN_MAX_ATTEMPTS` / `LOGIN_WINDOW_MINUTES` | `5` / `15` | Bloqueio por falhas de login (por conta; por IP, o limite é 4×). |
-| `ADMIN_USERNAME` / `ADMIN_PASSWORD` / `ADMIN_DISPLAY_NAME` | — | Administrador inicial (ver acima). |
-| `NODE_ENV` | `production` | Ambiente de execução. |
-| `LOG_REQUESTS` | `true` | Regista os pedidos à API (o instalador do Windows desliga-o). |
-
-### Parâmetros do jogo (**Admin → Parâmetros**)
+Configuram-se em **Admin → Parâmetros**:
 
 | Parâmetro | Omissão |
 |---|---|
@@ -211,13 +126,13 @@ As imagens são guardadas **na base de dados** (tabela `brand_assets`), por isso
 | Acentos | ignorados (`MAÇÃS` = `MACAS`); em alternativa, contam |
 | Registo de novas contas | ativo |
 | Reutilizar palavras quando a lista secreta se esgota | inativo |
-| Ranking público (`/ranking`) | ativo |
+| Ranking público (`ranking.html`) | ativo |
 
 As alterações ficam na auditoria. O tamanho das palavras, as tentativas e a política de acentos aplicam-se a partir do desafio seguinte. **Os pontos já atribuídos nunca são recalculados.**
 
 ## Regras e pontuação
 
-Os jogadores têm a explicação completa na página **/regras**, gerada a partir dos parâmetros. Em resumo:
+Os jogadores têm a explicação completa na página **Regras**, gerada a partir dos parâmetros. Em resumo:
 
 - **Avaliação das letras:** verde (posição certa), amarelo (existe noutra posição) e cinzento (não existe, ou já foram assinaladas todas as ocorrências). As letras repetidas são tratadas em duas passagens.
 - **Palavras desconhecidas:** são rejeitadas **sem gastar tentativa**.
@@ -232,128 +147,64 @@ Os jogadores têm a explicação completa na página **/regras**, gerada a parti
   - **desde sempre:** soma de todos os pontos.
 - **Correções:** os pontos ficam num **livro só de acrescento**. As correções são **ajustes administrativos** com motivo obrigatório, visíveis ao jogador e na auditoria.
 
-## Operação: backups, restauro e atualizações
+## Como funciona
 
-### Backups
-
-O backup usa a API de backup do SQLite, por isso é seguro com a aplicação a correr.
-
-| | Windows | Docker | Node |
-|---|---|---|---|
-| Automático | diário às 03:00, guarda 30 dias em `data\backups` | — (agende com cron) | — |
-| Manual | `.\windows\backup.ps1` (`-CopiarPara \\servidor\partilha`) | `docker compose exec app node scripts/backup.js` | `npm run backup` |
-
-Guarde também cópias **fora da máquina**.
-
-### Restauro
-
-A aplicação **tem de estar parada**.
-
-```powershell
-# Windows
-.\windows\servico.ps1 -Acao parar
-node scripts\restore.js data\backups\wordle-AAAAMMDD-HHMMSS.sqlite --yes
-.\windows\servico.ps1 -Acao iniciar
 ```
-```bash
-# Docker
-docker compose stop app
-docker compose cp ./backup.sqlite app:/app/data/backups/restaurar.sqlite
-docker compose run --rm --no-deps app node scripts/restore.js /app/data/backups/restaurar.sqlite --yes
-docker compose start app
+ Browser / app no telemóvel                 Supabase (plano gratuito)
+ ─────────────────────────────              ─────────────────────────────────────────
+ GitHub Pages: HTML + CSS + JS   ──Auth──▶  Contas (email interno = utilizador@wordle-league.local)
+   js/api.js traduz cada pedido  ──RPC───▶  Funções em "public" (get_game_state, submit_guess, …)
+   numa chamada ao Supabase                    │  validam, avaliam, pontuam (SECURITY DEFINER)
+                                 ──Storage▶    ▼
+                                            Esquema privado "wl" (tabelas): nunca exposto à API
+                                            Bucket "marca": logótipo e imagem do ranking
 ```
 
-O restauro verifica a integridade do backup e guarda a BD atual em `wordle.sqlite.pre-restore-<data>` antes de a substituir.
+| Pasta / ficheiro | Conteúdo |
+|---|---|
+| `*.html`, `css/`, `js/`, `img/`, `icons/` | O site (publicado tal como está pelo GitHub Pages). |
+| `config.js` | Endereço e chave pública do Supabase. |
+| `manifest.webmanifest`, `sw.js` | O que torna o site instalável como app. |
+| `js/api.js` | Recebe os pedidos das páginas (`/api/game/today`, `/api/admin/users`, …) e chama as funções do Supabase. |
+| `js/vendor/supabase.js` | Biblioteca oficial `@supabase/supabase-js` (cópia local, sem CDN). |
+| `supabase/1-esquema.sql` | Tabelas, regras e todas as funções da base de dados. Pode ser executado de novo para atualizar, sem perder dados. |
+| `.github/workflows/despertador.yml` | Pedido diário ao Supabase para o projeto gratuito não ser pausado por inatividade. |
+| `test/` | Testes automáticos e simulador local (ver [Desenvolvimento e testes](#desenvolvimento-e-testes)). |
 
-### Atualizar para uma nova versão
-
-```powershell
-# Windows (PowerShell como Administrador)
-cd C:\WordleLeague
-git pull                       # ou copie os ficheiros novos por cima, SEM apagar data\ nem .env
-powershell -ExecutionPolicy Bypass -File .\windows\atualizar.ps1
-```
-```bash
-# Docker
-git pull && docker compose up -d --build
-```
-
-O `atualizar.ps1` faz um backup, para a aplicação, reinstala as dependências e volta a iniciar. As **migrações da base de dados** (`src/db/migrations/*.sql`) são aplicadas automaticamente no arranque. Depois de atualizar, faça **Ctrl+F5** no browser.
+**Contas:** cada pessoa entra com o **nome de utilizador**. Por baixo, o Supabase Auth guarda-o como um email interno (`ana@wordle-league.local`), que nunca é usado para enviar mensagens. Não há recuperação de password por email: um administrador redefine-a no painel.
 
 ## Segurança
 
-- **Passwords:** guardadas com Argon2id. O login é limitado por conta e por IP e a mensagem de erro é sempre a mesma.
-- **Sessões:** ficam no SQLite, com cookie `HttpOnly` e `SameSite=Strict` (`Secure` com HTTPS). A sessão é regenerada no login e as sessões de um utilizador terminam se ele for bloqueado.
-- **CSRF:** token em todos os pedidos que alteram dados. A CSP é restritiva (sem scripts inline), há cabeçalhos de segurança (Helmet) e só se usam *prepared statements*.
-- **Palavra secreta:**
-  - nunca é enviada antes do fim do jogo do próprio utilizador;
-  - nem o administrador vê a palavra do dia no painel;
-  - a ordem de seleção depende de uma semente secreta guardada na BD.
-- **Integridade:** triggers na BD impedem alterar ou apagar pontos, tentativas, resultados concluídos e a auditoria.
-- **Segredos:** o `.env`, os dados e as listas reais estão no `.gitignore`. **Nunca os publique.**
+- **Tabelas inacessíveis à internet.** Estão no esquema `wl`, que não é exposto pela API, têm RLS ativo e nenhuma permissão para `anon`/`authenticated`. O browser só pode chamar as funções da app, e cada função verifica a sessão, o estado da conta e, nas de administração, o papel.
+- **Palavra secreta protegida.** A escolha (SHA-256 com semente secreta guardada na BD), a validação e a avaliação das tentativas são feitas na base de dados; a solução só é devolvida a quem já terminou o jogo desse dia. O painel só mostra palavras de dias anteriores.
+- **Pontos à prova de batota.** Os pontos são calculados na BD, num livro só de acrescento; *triggers* impedem alterar ou apagar resultados, tentativas, pontos e auditoria; índices únicos impedem pontos ou bónus a dobrar, mesmo com pedidos simultâneos.
+- **Chave pública no `config.js`:** é a chave *publishable/anon*, feita para estar no browser. Sozinha não dá acesso a nenhum dado.
+- **Contas:** passwords com 10+ caracteres, guardadas pelo Supabase (bcrypt). Bloquear uma conta corta o acesso de imediato e termina as sessões. A primeira conta criada fica administradora.
+- **Browser:** *Content Security Policy* restritiva (só scripts do próprio site), sem `innerHTML` com dados (usa `textContent`), nomes sem `<` nem `>`.
+- **Fora do repositório:** ative a verificação em dois passos (2FA) nas contas do **GitHub** e do **Supabase** — quem entrar nelas controla a app e os dados.
 
-## Testes
+## Custos e limites
+
+- **GitHub Pages e Actions:** gratuitos em repositórios públicos.
+- **Supabase (plano gratuito):** 500 MB de base de dados (o jogo usa uma fração mínima), 1 GB de ficheiros, sem cartão. O projeto é **pausado ao fim de 7 dias sem uso**; o [despertador](.github/workflows/despertador.yml) evita isso. Se mesmo assim acontecer, os dados não se perdem: basta carregar em **Restore project** em supabase.com.
+
+## Desenvolvimento e testes
+
+Requer Node.js 22 ou superior.
 
 ```bash
-npm ci
-npm test
+npm install
+npm test        # testes da base de dados (PostgreSQL em memória) e dos módulos do browser
+npm run serve   # app completa em http://localhost:5173 com um simulador local do Supabase
 ```
 
-São 69 testes automatizados (`node:test` + `supertest`) com bases de dados temporárias. Cobrem:
-- jogo: avaliação de letras, letras repetidas, acentos, palavras inválidas, limite de tentativas, vitória e derrota;
-- pontuação: pontos, streaks, bónus de pódio e prevenção de pontos duplicados;
-- desafio diário: palavra consistente, mudança à meia-noite de Lisboa (incluindo mudanças de hora), período de jogo e importação de listas;
-- segurança: isolamento entre utilizadores, CSRF, limitação de logins, bloqueio de contas e proteção da palavra secreta;
-- dados: personalização (incluindo a recusa de imagens disfarçadas), ranking público, regras, persistência após reinício e **migrações sobre bases de dados com dados** de versões anteriores.
+O simulador cria as contas `admin` e `ana` (password `password-de-teste-123`) e listas de palavras de teste. Os testes carregam o `supabase/1-esquema.sql` num PostgreSQL 17 em memória ([PGlite](https://pglite.dev)) e cobrem o jogo, a pontuação, as streaks, o pódio, o período de jogo, as classificações, as permissões e a importação.
 
-## Arquitetura
-
-```
-src/
-  server.js            arranque: migrações, admin inicial, HTTP, finalização de jogos expirados
-  app.js               Express: Helmet/CSP, sessões, CSRF, estáticos, rotas
-  config.js            variáveis de ambiente
-  context.js           ligação de modelos e serviços (injeção de dependências)
-  db/                  ligação SQLite, migrações (migrations/*.sql), store de sessões
-  models/              acesso a dados (prepared statements)
-  services/            jogo, avaliação, palavra diária, pontuação, streaks, importação,
-                       classificações, estatísticas, autenticação, administração, parâmetros
-  controllers/ routes/ adaptação HTTP ↔ serviços
-  middleware/          autenticação, CSRF, rate limit, erros
-  shared/normalize.js  normalização de palavras (a mesma no servidor e no browser)
-  utils/               datas/fuso, relógio (injetável nos testes), validação, erros
-public/                páginas HTML, CSS, JS e logótipo predefinido (sem dependências externas)
-scripts/               create-admin, migrate, backup, restore
-windows/               instalação e operação no Windows (PowerShell)
-test/                  testes automatizados
-examples/              ficheiros de exemplo de importação
-listas/                listas reais (só local, ignoradas pelo git)
-docs/DECISOES.md       decisões técnicas e limitações
-Dockerfile, docker-compose.yml, nginx/   implementação alternativa com Docker
-```
-
-**Base de dados:** SQLite em modo WAL. As tabelas principais são `users`, `daily_challenges`, `guesses`, `daily_results`, `word_bank`, `accepted_words`, `seasons`, `point_transactions` (livro de pontos), `settings`, `brand_assets` (imagens de personalização), `audit_log`, `word_imports` e `sessions`.
-
-**Alterar o esquema:** crie um ficheiro novo, por exemplo `005_descricao.sql`. Nunca edite uma migração já aplicada.
-
-## API
-
-Todos os pedidos que alteram dados exigem o cabeçalho `X-CSRF-Token`, devolvido por `/api/auth/session` e pelo login.
-
-| Rota | Acesso | Descrição |
-|---|---|---|
-| `GET /api/health` | público | Estado do serviço. |
-| `GET /api/brand` · `GET /brand/logo` · `GET /brand/ranking` | público | Personalização (nome, textos e imagens). |
-| `GET /api/public/leaderboard` | público (desativável) | Classificação do mês em curso (`/ranking`). |
-| `GET /api/auth/session` · `POST /api/auth/login` · `register` · `logout` · `password` | — | Autenticação. |
-| `GET /api/game/today` · `POST /api/game/guess` | sessão | Estado do jogo, período de jogo e tentativa. |
-| `GET /api/leaderboard/daily?date=` · `monthly?season=AAAA-MM` · `alltime` · `seasons` | sessão | Classificações. |
-| `GET /api/profile/me` · `GET /api/rules` | sessão | Perfil e regras atuais. |
-| `/api/admin/…` (`status`, `stats`, `users`, `settings`, `words`, `points`, `brand`, `audit`) | administrador | Painel de administração. |
+**Publicar alterações:** basta enviar para o ramo `main` (o GitHub Pages atualiza em 1–2 minutos). Ao mudar ficheiros do site, aumente o número da versão em `sw.js` (`wordle-league-vN`) para as apps instaladas receberem logo a atualização. Ao mudar o `supabase/1-esquema.sql`, cole-o de novo no *SQL Editor* do Supabase e carregue em **Run**.
 
 ## Decisões técnicas e limitações
 
-Ver **[docs/DECISOES.md](docs/DECISOES.md)**: estratégia de seleção da palavra, política de acentos, definição de streak, bónus, período de jogo e limitações conhecidas (por exemplo, a aplicação pressupõe uma única instância).
+Ver **[docs/DECISOES.md](docs/DECISOES.md)**: estratégia de seleção da palavra, política de acentos, definição de streak, bónus, período de jogo e limitações conhecidas.
 
 ## Licença
 
