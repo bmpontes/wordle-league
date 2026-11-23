@@ -108,7 +108,7 @@ Tudo se configura em **Admin → Personalização** e aplica-se a todas as pági
 | Logótipo | "W" neutro | PNG, JPEG ou WEBP, de preferência quadrado, até 2 MB. Opção para o recortar em círculo. |
 | Imagem do ranking público | — | Opcional: imagem grande (ao alto) do lado direito. Sem ela, é usado o logótipo com brilho sobre um fundo neutro. |
 
-As imagens ficam no **Storage do Supabase** (pasta pública `marca`); só administradores as podem enviar ou apagar. O tipo é verificado pelo conteúdo do ficheiro e **não são aceites SVG** (podem conter scripts). O ícone da app instalada no telemóvel é sempre o "W" predefinido (pasta [`icons/`](icons/)).
+As imagens ficam no **Storage do Supabase** (pasta pública `marca`); só administradores as podem enviar ou apagar. O tipo é verificado pelo conteúdo do ficheiro e **não são aceites SVG** (podem conter scripts). Com um logótipo próprio em **PNG ou JPEG** (quadrado, sem transparência, 180×180 ou mais), esse logótipo passa a ser também o ícone da app no **iPhone** ao *Adicionar ao ecrã principal* — a imagem vem do Supabase e nunca entra no repositório. Quem já tinha a app instalada tem de a remover e voltar a adicionar. No **Android** o ícone é sempre o "W" predefinido (pasta [`icons/`](icons/)).
 
 ## Parâmetros do jogo
 

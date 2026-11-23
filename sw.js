@@ -1,7 +1,7 @@
 // Service worker: a app abre depressa e recebe as atualizações quando há rede.
 // Os dados (Supabase) vêm sempre da rede e nunca ficam guardados aqui.
 // Ao publicar alterações aos ficheiros, aumente o número da versão.
-const CACHE = 'wordle-league-v1';
+const CACHE = 'wordle-league-v2';
 const SHELL = [
   './', './index.html', './login.html', './leaderboard.html', './profile.html', './regras.html', './admin.html',
   './ranking.html', './config.js', './manifest.webmanifest', './css/style.css', './css/ranking.css',

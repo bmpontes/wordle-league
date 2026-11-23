@@ -56,7 +56,7 @@ Quando a especificação não definia um ponto, foi escolhida a solução mais s
 ### Personalização
 - **Textos nos parâmetros, imagens no Storage.** O nome, o subtítulo, o rodapé e o "logótipo redondo" são parâmetros normais (auditados). O logótipo e a imagem do ranking ficam no bucket público `marca` do Supabase Storage; a tabela `wl.brand_assets` guarda qual é o ficheiro atual. Só administradores escrevem no bucket.
 - **As páginas são estáticas e genéricas.** O `common.js` chama `get_brand` (público, só textos e caminhos) e preenche os elementos `data-brand`. Cada imagem nova tem um nome novo, por isso a cache nunca mostra a antiga.
-- **Uploads seguros:** só PNG, JPEG ou WEBP, com o tipo verificado pelos primeiros bytes e no máximo 2 MB. **Não se aceitam SVG**, que podem conter scripts. Sem logótipo próprio, é usado `img/default-logo.svg`. O ícone da app instalada é sempre o predefinido (`icons/`), porque o iOS exige PNG.
+- **Uploads seguros:** só PNG, JPEG ou WEBP, com o tipo verificado pelos primeiros bytes e no máximo 2 MB. **Não se aceitam SVG**, que podem conter scripts. Sem logótipo próprio, é usado `img/default-logo.svg`. Com um logótipo próprio em PNG ou JPEG, o `common.js` aponta o `apple-touch-icon` para ele, e o iOS usa-o como ícone da app ao adicioná-la ao ecrã principal; a imagem fica só no Supabase, nunca no repositório. O manifesto (usado pelo Android) é estático e mantém o ícone predefinido (`icons/`).
 
 ### Contas
 - **O registo está aberto por omissão** (pedido na especificação) e o administrador pode desativá-lo.

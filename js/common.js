@@ -150,8 +150,15 @@
       img.src = b.logoUrl;
       img.classList.toggle('round', Boolean(b.logoRound));
     }
-    // O ícone da app instalada fica o predefinido (PNG); só o do separador muda.
-    if (b.customLogo) for (const link of document.querySelectorAll('link[rel="icon"]')) link.href = b.logoUrl;
+    // Logótipo próprio: passa a ser o ícone do separador e, se for PNG ou JPEG, também o
+    // ícone da app no iPhone (o iOS lê-o ao "Adicionar ao ecrã principal"). A imagem vem
+    // do Supabase, não do repositório. No Android fica o ícone do manifesto.
+    if (b.customLogo) {
+      for (const link of document.querySelectorAll('link[rel="icon"]')) link.href = b.logoUrl;
+      if (/\.(png|jpe?g)$/i.test(b.logoUrl)) {
+        for (const link of document.querySelectorAll('link[rel="apple-touch-icon"]')) link.href = b.logoUrl;
+      }
+    }
     const page = document.body.dataset.title;
     document.title = page ? `${page} · ${b.name}` : b.name;
     return b;
