@@ -101,7 +101,8 @@ export async function setup({ neutral = true } = {}) {
 
   if (neutral) {
     await db.exec(`insert into wl.settings (key, value) values
-      ('play_start', '"00:00"'), ('play_end', '"00:00"'), ('podium_bonus_points', '[]')`);
+      ('play_start', '"00:00"'), ('play_end', '"00:00"'), ('podium_bonus_points', '[]'),
+      ('play_days', '[1,2,3,4,5,6,7]')`);
   }
   return t;
 }

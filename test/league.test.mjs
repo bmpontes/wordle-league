@@ -29,7 +29,7 @@ test('sem lista importada: estado indisponível e erro controlado', async () => 
 });
 
 test('a mesma palavra durante todo o dia e mudança à meia-noite de Lisboa', async () => {
-  const { t } = await prepared();
+  const { t, user } = await prepared();
   const ensure = async () => (await t.sql('select (wl.ensure_challenge()).*'))[0];
   t.setNow('2026-07-14T00:00:00Z'); // 01:00 em Lisboa (verão)
   const morning = await ensure();
@@ -37,6 +37,7 @@ test('a mesma palavra durante todo o dia e mudança à meia-noite de Lisboa', as
   t.setNow('2026-07-14T22:59:59Z'); // 23:59:59 em Lisboa
   const late = await ensure();
   assert.equal(late.id, morning.id);
+  await t.rpc(user, 'submit_guess', { p_guess: 'ARROZ' }); // jogada: a palavra fica gasta
   t.setNow('2026-07-14T23:00:00Z'); // 00:00 de 15/07 em Lisboa
   const next = await ensure();
   assert.equal(next.challenge_date.toISOString().slice(0, 10), '2026-07-15');
@@ -53,10 +54,10 @@ test('escolha determinística: não repete até esgotar; reutilização só se c
   const ana = await t.signUp('ana');
   await t.importWords(admin, 'secret', ['PEDRA', 'LIVRO']);
   t.setNow('2026-07-01T10:00:00Z');
-  await t.rpc(ana, 'get_game_state');
+  await t.rpc(ana, 'submit_guess', { p_guess: 'PEDRA' });
   const d1 = await t.secretOf();
   t.setNow('2026-07-02T10:00:00Z');
-  await t.rpc(ana, 'get_game_state');
+  await t.rpc(ana, 'submit_guess', { p_guess: 'PEDRA' });
   const d2 = await t.secretOf();
   assert.notEqual(d1, d2);
 
@@ -79,7 +80,7 @@ test('substituir a lista não altera desafios já criados nem repete palavras us
   const ana = await t.signUp('ana');
   await t.importWords(admin, 'secret', ['PEDRA']);
   t.setNow('2026-07-01T10:00:00Z');
-  await t.rpc(ana, 'get_game_state');
+  await t.rpc(ana, 'submit_guess', { p_guess: 'PEDRA' });
   await t.importWords(admin, 'secret', ['PEDRA', 'NUVEM']);
   assert.equal(await t.secretOf('2026-07-01'), 'PEDRA');
   t.setNow('2026-07-02T10:00:00Z');

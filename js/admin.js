@@ -253,6 +253,7 @@
     document.getElementById('s-registration_enabled').checked = settings.registration_enabled;
     document.getElementById('s-recycle_words').checked = settings.recycle_words;
     document.getElementById('s-public_leaderboard').checked = settings.public_leaderboard;
+    for (const box of document.querySelectorAll('#s-play_days input')) box.checked = (settings.play_days || [1, 2, 3, 4, 5, 6, 7]).includes(Number(box.value));
   };
 
   document.getElementById('form-settings').addEventListener('submit', async (e) => {
@@ -268,6 +269,7 @@
     body.registration_enabled = document.getElementById('s-registration_enabled').checked;
     body.recycle_words = document.getElementById('s-recycle_words').checked;
     body.public_leaderboard = document.getElementById('s-public_leaderboard').checked;
+    body.play_days = [...document.querySelectorAll('#s-play_days input:checked')].map((b) => Number(b.value));
     try {
       const r = await Api.put('/api/admin/settings', body);
       const n = Object.keys(r.changed).length;

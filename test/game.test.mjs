@@ -112,9 +112,13 @@ test('streak: bónus de 15 pontos ao 7.º dia consecutivo, atribuído uma única
   assert.equal(p.bestMonthlyRank.position, 1);
   assert.equal(p.bestMonthlyRank.season, '2026-07');
 
-  // Um dia sem jogar interrompe a streak; ela mantém-se até ao fim do dia seguinte.
+  // A streak mantém-se enquanto ainda pode jogar hoje; um dia de jogo em que os outros
+  // jogaram e ela não, interrompe-a.
   t.setNow('2026-07-09T10:00:00Z');
   assert.equal((await t.rpc(user, 'get_profile')).currentStreak, 8);
+  const rui = await t.signUp('rui');
+  await t.rpc(rui, 'submit_guess', { p_guess: WRONG[0] });
+  assert.equal((await t.rpc(user, 'get_profile')).currentStreak, 8, 'ainda pode jogar hoje');
   t.setNow('2026-07-10T10:00:00Z');
   assert.equal((await t.rpc(user, 'get_profile')).currentStreak, 0);
 });

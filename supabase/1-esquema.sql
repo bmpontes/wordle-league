@@ -311,6 +311,7 @@ create or replace function wl.defaults() returns jsonb language sql immutable as
     'podium_bonus_points', jsonb_build_array(15, 10, 5),
     'play_start', '09:30',
     'play_end', '00:00',
+    'play_days', jsonb_build_array(1, 2, 3, 4, 5),  -- dias da semana com jogo (1 = segunda … 7 = domingo)
     'streak_mode', 'wins',
     'accent_mode', 'strip',
     'registration_enabled', true,
@@ -326,6 +327,32 @@ $$;
 create or replace function wl.cfg() returns jsonb language sql stable as $$
   select wl.defaults() || coalesce(
     (select jsonb_object_agg(key, value) from wl.settings where wl.defaults() ? key), '{}'::jsonb)
+$$;
+
+-- Há jogo nesta data? (dias da semana configurados em play_days; 1 = segunda … 7 = domingo)
+create or replace function wl.is_play_day(p_date date, s jsonb default null) returns boolean
+language sql stable as $$
+  select coalesce(s, wl.cfg())->'play_days' @> to_jsonb(extract(isodow from p_date)::int)
+$$;
+
+-- Próximo dia de jogo a partir de p_date (inclusive).
+create or replace function wl.next_play_day(p_date date, s jsonb default null) returns date
+language sql stable as $$
+  select min(d)::date from generate_series(p_date, p_date + 6, interval '1 day') d
+   where wl.is_play_day(d::date, coalesce(s, wl.cfg()))
+$$;
+
+create or replace function wl.weekday_name(p_date date) returns text language sql immutable as $$
+  select (array['segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado', 'domingo'])
+         [extract(isodow from p_date)::int]
+$$;
+
+-- Dias que contam para as streaks: dias com desafio em que alguém jogou. Assim, fins de
+-- semana, feriados ou dias em que ninguém jogou não interrompem a streak de ninguém.
+create or replace function wl.game_days() returns table (d date, n integer) language sql stable as $$
+  select c.challenge_date, (row_number() over (order by c.challenge_date))::int
+    from wl.daily_challenges c
+   where exists (select 1 from wl.daily_results r where r.challenge_id = c.id)
 $$;
 
 -- Semente secreta para ordenar as palavras (nunca sai da base de dados).
@@ -418,8 +445,12 @@ begin
               from wl.word_bank where length = len) x
      order by k, word collate "C"
   ), used as (
-    select case when is_strict then word else word_plain end as k, count(*)::int as n
-      from wl.daily_challenges group by 1
+    -- Só conta como usada uma palavra que alguém jogou: a de um dia sem jogadores
+    -- volta a estar livre e, como a ordem é fixa, é a escolhida no dia de jogo seguinte.
+    select case when is_strict then c.word else c.word_plain end as k, count(*)::int as n
+      from wl.daily_challenges c
+     where exists (select 1 from wl.daily_results r where r.challenge_id = c.id)
+     group by 1
   )
   select c.id, c.word, c.k, coalesce(u.n, 0) from cand c left join used u on u.k = c.k;
 
@@ -456,7 +487,8 @@ begin
   with cand as (
     select distinct case when is_strict then word else word_plain end as k from wl.word_bank where length = len
   ), used as (
-    select distinct case when is_strict then word else word_plain end as k from wl.daily_challenges
+    select distinct case when is_strict then c.word else c.word_plain end as k from wl.daily_challenges c
+     where exists (select 1 from wl.daily_results r where r.challenge_id = c.id)
   )
   select count(*), count(*) filter (where u.k is null) into keys, unused
     from cand c left join used u on u.k = c.k;
@@ -516,30 +548,48 @@ create or replace function wl.qualifies(p_status text, p_mode text) returns bool
   select case when p_mode = 'participation' then p_status in ('won', 'lost', 'expired') else p_status = 'won' end
 $$;
 
--- Comprimento da streak que termina exatamente em p_date (0 se esse dia não conta).
+-- Comprimento da streak que termina exatamente no dia de jogo p_date (0 se esse dia não
+-- conta). Uma streak são dias de jogo seguidos (ver wl.game_days): fins de semana e dias
+-- sem jogadores não a interrompem; um dia de jogo em que o utilizador não conta, sim.
 create or replace function wl.streak_ending_at(p_user uuid, p_date date, p_mode text) returns integer
 language plpgsql stable as $$
-declare n integer := 0; d date := p_date;
+declare n integer := 0; d date;
 begin
-  loop
+  for d in select g.d from wl.game_days() g where g.d <= p_date order by g.d desc loop
     exit when not exists (
       select 1 from wl.daily_results r join wl.daily_challenges c on c.id = r.challenge_id
        where r.user_id = p_user and c.challenge_date = d and wl.qualifies(r.status, p_mode));
     n := n + 1;
-    d := d - 1;
   end loop;
   return n;
 end $$;
 
--- Melhor streak de cada utilizador num período (dias consecutivos que contam).
+-- Streak atual: termina no último dia de jogo; se esse dia é hoje e o utilizador ainda
+-- não jogou, termina no dia de jogo anterior (ainda pode jogar hoje sem a perder).
+create or replace function wl.current_streak(p_user uuid, p_mode text) returns integer
+language plpgsql stable as $$
+declare last_day date; prev_day date; n integer;
+begin
+  select max(g.d) into last_day from wl.game_days() g where g.d <= wl.today();
+  if last_day is null then return 0; end if;
+  n := wl.streak_ending_at(p_user, last_day, p_mode);
+  if n > 0 or last_day < wl.today() then return n; end if;
+  select max(g.d) into prev_day from wl.game_days() g where g.d < last_day;
+  return case when prev_day is null then 0 else wl.streak_ending_at(p_user, prev_day, p_mode) end;
+end $$;
+
+-- Melhor streak de cada utilizador num período (dias de jogo seguidos que contam).
 create or replace function wl.best_streaks(p_from date, p_to date, p_mode text)
 returns table (user_id uuid, best integer) language sql stable as $$
-  with q as (
-    select distinct r.user_id, c.challenge_date as d
-      from wl.daily_results r join wl.daily_challenges c on c.id = r.challenge_id
+  with gd as (select * from wl.game_days()),
+  q as (
+    select distinct r.user_id, gd.n
+      from wl.daily_results r
+      join wl.daily_challenges c on c.id = r.challenge_id
+      join gd on gd.d = c.challenge_date
      where c.challenge_date between p_from and p_to and wl.qualifies(r.status, p_mode)
   ), g as (
-    select q.user_id, q.d - (row_number() over (partition by q.user_id order by q.d))::int as grp from q
+    select q.user_id, q.n - (row_number() over (partition by q.user_id order by q.n))::int as grp from q
   )
   select g.user_id, max(cnt)::int from (select g.user_id, g.grp, count(*) as cnt from g group by 1, 2) g group by 1
 $$;
@@ -627,20 +677,33 @@ declare
   mins integer := extract(hour from local_ts)::int * 60 + extract(minute from local_ts)::int;
   st integer := wl.hhmm(s->>'play_start');
   en integer := wl.hhmm(s->>'play_end', true);
+  play_today boolean := wl.is_play_day(t, s);
+  phase text;
+  next_open date;
 begin
+  phase := case when not play_today then 'off' when mins < st then 'before' when mins >= en then 'after' else 'open' end;
+  next_open := case when phase = 'before' then t else wl.next_play_day(t + 1, s) end;
   return jsonb_build_object(
-    'open', mins >= st and mins < en,
-    'phase', case when mins < st then 'before' when mins >= en then 'after' else 'open' end,
+    'open', phase = 'open',
+    'phase', phase,
     'start', s->>'play_start',
     'end', s->>'play_end',
-    'opensAt', wl.iso(wl.instant_at(case when mins < st then t else t + 1 end, st)),
-    'closesAt', wl.iso(wl.instant_at(t, en))
+    'playDays', s->'play_days',
+    'opensAt', wl.iso(wl.instant_at(next_open, st)),
+    'closesAt', wl.iso(wl.instant_at(t, en)),
+    -- "hoje", "amanhã", "na segunda-feira", "no sábado"…
+    'nextOpenLabel', case when next_open = t then 'hoje' when next_open = t + 1 then 'amanhã'
+                          when extract(isodow from next_open) >= 6 then 'no ' || wl.weekday_name(next_open)
+                          else 'na ' || wl.weekday_name(next_open) end
   );
 end $$;
 
 create or replace function wl.closed_message(w jsonb) returns text language sql immutable as $$
-  select case when w->>'phase' = 'before' then format('O desafio de hoje abre às %s.', w->>'start')
-              else format('O desafio de hoje terminou às %s. Volte amanhã a partir das %s.', w->>'end', w->>'start') end
+  select case w->>'phase'
+           when 'before' then format('O desafio de hoje abre às %s.', w->>'start')
+           when 'off' then format('Hoje não há desafio. O próximo é %s, a partir das %s.', w->>'nextOpenLabel', w->>'start')
+           else format('O desafio de hoje terminou às %s. Volte %s a partir das %s.', w->>'end', w->>'nextOpenLabel', w->>'start')
+         end
 $$;
 
 create or replace function wl.build_state(ch wl.daily_challenges, res wl.daily_results, w jsonb) returns jsonb
@@ -654,7 +717,7 @@ begin
     'wordLength', ch.word_length,
     'maxAttempts', ch.max_attempts,
     'accentMode', ch.accent_mode,
-    'nextChallengeAt', wl.iso(wl.instant_at(wl.today() + 1, 0)),
+    'nextChallengeAt', wl.iso(wl.instant_at(wl.next_play_day(wl.today() + 1), 0)),
     'serverNow', wl.iso(wl.now())
   );
   if res.id is null then
@@ -690,7 +753,7 @@ language sql stable as $$
   select jsonb_build_object(
     'available', false, 'window', w, 'code', p_code, 'message', p_message,
     'date', to_char(wl.today(), 'YYYY-MM-DD'),
-    'nextChallengeAt', wl.iso(wl.instant_at(wl.today() + 1, 0)),
+    'nextChallengeAt', wl.iso(wl.instant_at(wl.next_play_day(wl.today() + 1), 0)),
     'serverNow', wl.iso(wl.now()))
 $$;
 
@@ -1065,8 +1128,7 @@ begin
   select greatest((s->>'max_attempts')::int, coalesce(max(c.max_attempts), 0)) into maxatt
     from wl.daily_results r join wl.daily_challenges c on c.id = r.challenge_id
    where r.user_id = me.id and r.status <> 'in_progress';
-  cur := wl.streak_ending_at(me.id, wl.today(), mode);
-  if cur = 0 then cur := wl.streak_ending_at(me.id, wl.today() - 1, mode); end if;
+  cur := wl.current_streak(me.id, mode);
   select coalesce(max(bs.best), 0) into best from wl.best_streaks('0001-01-01', '9999-12-31', mode) bs where bs.user_id = me.id;
 
   select jsonb_build_object('position', b.pos, 'season', se.code) into best_rank
@@ -1128,6 +1190,7 @@ begin
     'accentMode', s->>'accent_mode',
     'playStart', s->>'play_start',
     'playEnd', s->>'play_end',
+    'playDays', s->'play_days',
     'pointsByAttempt', s->'points_by_attempt',
     'pointsLoss', (s->>'points_loss')::int,
     'podiumBonus', s->'podium_bonus_points',
@@ -1207,7 +1270,10 @@ begin
                      round(avg(r.attempts_used) filter (where r.status = 'won'), 2)::float8 as avg_attempts
                 from wl.daily_challenges c left join wl.daily_results r on r.challenge_id = c.id
                where c.challenge_date < wl.today()
-               group by c.id order by c.challenge_date desc limit 60) x), '[]'::jsonb));
+               group by c.id
+               -- Dias sem jogadores ficam de fora: essa palavra ainda vai ser usada.
+               having count(r.id) > 0
+               order by c.challenge_date desc limit 60) x), '[]'::jsonb));
 end $$;
 
 create or replace function public.admin_users() returns jsonb
@@ -1353,6 +1419,18 @@ begin
   return t;
 end $$;
 
+-- Dias de jogo: lista de 1 (segunda) a 7 (domingo), sem repetições, com pelo menos um dia.
+create or replace function wl.v_days(v jsonb) returns jsonb language plpgsql immutable as $$
+declare out jsonb;
+begin
+  if jsonb_typeof(v) is distinct from 'array' or jsonb_array_length(v) = 0
+     or exists (select 1 from jsonb_array_elements(v) e where jsonb_typeof(e) <> 'number' or e::text !~ '^[1-7]$') then
+    perform wl.fail('BAD_SETTING', 'Escolha pelo menos um dia de jogo.', 400);
+  end if;
+  select jsonb_agg(d order by d) into out from (select distinct e::text::int as d from jsonb_array_elements(v) e) x;
+  return out;
+end $$;
+
 create or replace function wl.v_int_array(v jsonb, p_min_len integer, p_max_len integer, p_label text, p_err text) returns jsonb
 language plpgsql immutable as $$
 declare out jsonb := '[]'::jsonb; i integer;
@@ -1387,6 +1465,7 @@ begin
       when 'podium_bonus_points' then wl.v_int_array(v, 0, 10, 'Bónus do %s.º a acertar', 'Bónus de pódio inválido (no máximo 10 posições).')
       when 'play_start' then to_jsonb(wl.v_text(v, 5, 5, 'Hora de abertura'))
       when 'play_end' then to_jsonb(wl.v_text(v, 5, 5, 'Hora de fecho'))
+      when 'play_days' then wl.v_days(v)
       when 'streak_mode' then v
       when 'accent_mode' then v
       when 'registration_enabled' then to_jsonb(wl.v_bool(v, k))

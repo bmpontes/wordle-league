@@ -15,6 +15,17 @@
     return row;
   }
 
+  const DAY_NAMES = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+  /** [1,2,3,4,5] → "de segunda a sexta"; [1,3,5] → "à segunda, quarta e sexta". */
+  function daysText(days) {
+    const d = [...(days || [])].sort((a, b) => a - b);
+    if (d.length === 7) return 'todos os dias';
+    const consecutive = d.length > 2 && d.every((x, i) => i === 0 || x === d[i - 1] + 1);
+    if (consecutive) return `de ${DAY_NAMES[d[0] - 1]} a ${DAY_NAMES[d[d.length - 1] - 1]}`;
+    const names = d.map((x) => DAY_NAMES[x - 1]);
+    return `${d[0] >= 6 ? 'ao' : 'à'} ${names.length > 1 ? `${names.slice(0, -1).join(', ')} e ${names[names.length - 1]}` : names[0]}`;
+  }
+
   const fmtHour = (h) => (h === '00:00' ? 'à meia-noite (00:00)' : `às ${h}`);
   const pts = (n) => `${n} ponto${n === 1 ? '' : 's'}`;
 
@@ -25,7 +36,7 @@
 
     // 1. Como jogar
     root.append(card('Como jogar', [
-      p('Todos os dias há uma ', strong('palavra secreta'), ` de ${r.wordLength} letras, igual para toda a gente. Tem `, strong(`${r.maxAttempts} tentativas`), ' para a descobrir.'),
+      p(...(r.playDays && r.playDays.length ? ['Há jogo ', strong(daysText(r.playDays)), '. Em cada dia de jogo há uma '] : ['Todos os dias há uma ']), strong('palavra secreta'), ` de ${r.wordLength} letras, igual para toda a gente. Tem `, strong(`${r.maxAttempts} tentativas`), ' para a descobrir.'),
       scheduleFullDay
         ? p('O jogo está aberto durante todo o dia. A palavra muda à meia-noite (hora de Portugal).')
         : p('O jogo está aberto ', strong(`das ${r.playStart} ${r.playEnd === '00:00' ? 'até à meia-noite' : `às ${r.playEnd}`}`),
@@ -80,8 +91,9 @@
 
     // 3. Streak
     root.append(card('Streak', [
-      p('A streak conta os ', strong(streakText), ' (dias de calendário, hora de Portugal). ',
-        r.streakMode === 'participation' ? 'Um dia sem jogar volta a pôr a streak a zero.' : 'Perder ou não jogar num dia volta a pôr a streak a zero.'),
+      p('A streak conta os ', strong(streakText), ', contando só os dias de jogo: os dias sem desafio (por exemplo, o fim de semana) e os dias em que ninguém jogou não a interrompem. ',
+        r.streakMode === 'participation' ? 'Não jogar num dia de jogo volta a pôr a streak a zero.' : 'Perder ou não jogar num dia de jogo volta a pôr a streak a zero.'),
+      p('Se num dia de jogo ninguém jogar, a palavra desse dia passa para o dia de jogo seguinte.'),
       p('A streak atual e a melhor streak aparecem no seu Perfil.'),
     ]));
 

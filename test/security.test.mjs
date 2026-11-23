@@ -119,7 +119,7 @@ test('redefinir password (validada) e alterar nome de apresentação (auditado)'
 test('administrador só vê palavras de dias anteriores', async () => {
   const { t, admin, user } = await prepared();
   t.setNow('2026-07-14T10:00:00Z');
-  await t.rpc(user, 'get_game_state');
+  await t.rpc(user, 'submit_guess', { p_guess: 'ARROZ' });
   t.setNow('2026-07-15T10:00:00Z');
   await t.rpc(user, 'get_game_state');
   const today = await t.secretOf();

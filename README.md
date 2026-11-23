@@ -119,9 +119,10 @@ Configuram-se em **Admin → Parâmetros**:
 | Letras por palavra / tentativas | 5 / 6 |
 | Pontos por vitória na 1.ª–6.ª tentativa | 100, 80, 65, 50, 35, 25 |
 | Pontos por participação sem vitória | 5 |
+| **Dias com jogo** | segunda a sexta (ao fim de semana não há desafio) |
 | **Período de jogo** (hora de Portugal; 00:00 = meia-noite) | das 09:30 às 00:00 |
 | **Bónus de pódio** (1.º, 2.º, 3.º… a acertar no dia) | 15, 10, 5 (lista livre; vazia = desativado) |
-| Bónus de streak | +15 a cada 7 dias consecutivos |
+| Bónus de streak | +15 a cada 7 dias de jogo seguidos |
 | Contagem da streak | dias seguidos com vitória (ou dias seguidos a jogar) |
 | Acentos | ignorados (`MAÇÃS` = `MACAS`); em alternativa, contam |
 | Registo de novas contas | ativo |
@@ -136,10 +137,11 @@ Os jogadores têm a explicação completa na página **Regras**, gerada a partir
 
 - **Avaliação das letras:** verde (posição certa), amarelo (existe noutra posição) e cinzento (não existe, ou já foram assinaladas todas as ocorrências). As letras repetidas são tratadas em duas passagens.
 - **Palavras desconhecidas:** são rejeitadas **sem gastar tentativa**.
-- **Um jogo por pessoa e por dia,** só dentro do período de jogo. Antes da abertura, a palavra do dia nem sequer é escolhida.
+- **Um jogo por pessoa e por dia,** só nos dias com jogo e dentro do período de jogo. Antes da abertura, a palavra do dia nem sequer é escolhida.
+- **Palavra não jogada:** se num dia de jogo ninguém jogar, a palavra desse dia passa para o dia de jogo seguinte.
 - **Pontos de um jogo:** os da vitória (consoante a tentativa) ou os de participação. A estes juntam-se:
   - **Pódio do dia:** +15, +10 e +5 para os três primeiros a acertar. Conta a hora a que acertaram; uma derrota não ocupa posição.
-  - **Streak:** +15 quando a streak chega a 7, 14, 21… dias.
+  - **Streak:** +15 quando a streak chega a 7, 14, 21… dias de jogo seguidos. Os dias sem desafio (fim de semana) e os dias em que ninguém jogou não a interrompem.
 - **Jogos a meio:** um jogo começado e não terminado é fechado no dia seguinte como "não concluído", com os pontos de participação.
 - **Classificações:**
   - **diária:** pontos do dia, com bónus; em caso de empate, ganha quem usou menos tentativas e, depois, quem terminou primeiro;
